@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { ApiService } from './services/api_service';
-import { AuthService, AuthUser } from './services/auth_serrvice';
+import { AuthService, AuthUser } from './services/auth_service';
 
 export interface AdminUser extends AuthUser {}
 

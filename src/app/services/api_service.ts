@@ -30,13 +30,14 @@ export class ApiService {
 
   async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const headers: Record<string,string> = { Accept:'application/json' };
-    if(options.body !== undefined) headers['Content-Type']='application/json';
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    if(options.body !== undefined && !isFormData) headers['Content-Type']='application/json';
     if(!options.anonymous && this.accessToken) headers['Authorization']=`Bearer ${this.accessToken}`;
     let response: Response;
     try {
       response=await fetch(`${this.baseUrl}${path}`,{
         method:options.method ?? 'GET',headers,
-        body:options.body === undefined ? undefined : JSON.stringify(options.body),
+        body:options.body === undefined ? undefined : isFormData ? options.body as FormData : JSON.stringify(options.body),
       });
     } catch {
       throw new ApiError(`Could not connect to FarmerLink API at ${this.baseUrl}. Check the API URL and server connection.`,0);

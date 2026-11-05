@@ -1,0 +1,22 @@
+<section>
+      <header class="catalog-intro"><div><span class="eyebrow">MARKETPLACE</span><h1>Catalog overview</h1><p>Review products, categories, and harvest inventory from one place.</p></div></header>
+      <div class="catalog-stats">
+        <app-stat-card label="Products" [value]="metric(analytics?.catalog?.products_total)" icon="▣" tone="green" context="All marketplace listings"/>
+        <app-stat-card label="Active inventory" [value]="metric(analytics?.catalog?.active_product_quantity)" icon="♧" tone="gold" context="Available product units"/>
+        <app-stat-card label="Categories retrieved" [value]="categories.length.toLocaleString()" icon="◈" tone="blue" context="Up to 500 API records"/>
+        <app-stat-card label="Recent batches" [value]="batches.length.toLocaleString()" icon="▤" tone="rose" context="Latest API records"/>
+      </div>
+      <nav class="catalog-links" aria-label="Catalog management pages">
+        <a routerLink="/admin/products"><span>▣</span><div><b>Products</b><small>Manage marketplace listings and prices</small></div><i>→</i></a>
+        <a routerLink="/admin/categories"><span>◈</span><div><b>Categories</b><small>Organize the marketplace catalog</small></div><i>→</i></a>
+        <a routerLink="/admin/harvest-batches"><span>♧</span><div><b>Harvest batches</b><small>Track produce quantities and availability</small></div><i>→</i></a>
+      </nav>
+      <div class="catalog-recent-grid">
+        <section class="panel"><div class="panel-heading"><div><h2>Recently added products</h2><p>Latest records returned by the products endpoint</p></div><a routerLink="/admin/products">Manage products →</a></div>
+          @if(products.length){<div class="recent-list">@for(product of products.slice(0,5);track product.id){<a [routerLink]="'/admin/products/'+product.id"><span class="recent-mark">▣</span><span><b>{{product.name}}</b><small>{{product.category_name||'Marketplace product'}} · {{product.status||'Status unavailable'}}</small></span><strong>₱{{money(product.price_per_unit)}}</strong></a>}</div>}@else{<app-empty-state title="No product records" description="Products will appear here when the API returns them."/>}
+        </section>
+        <section class="panel"><div class="panel-heading"><div><h2>Recent harvest batches</h2><p>Latest inventory records returned by the API</p></div><a routerLink="/admin/harvest-batches">Manage batches →</a></div>
+          @if(batches.length){<div class="recent-list">@for(batch of batches.slice(0,5);track batch.id){<a [routerLink]="'/admin/harvest-batches/'+batch.id"><span class="recent-mark">♧</span><span><b>{{batch.batch_code||'Harvest batch #'+batch.id}}</b><small>{{batch.product_name||'Product #'+batch.product_id}} · {{batch.status}}</small></span><strong>{{number(batch.remaining_quantity)}} available</strong></a>}</div>}@else{<app-empty-state title="No harvest batches" description="Batch inventory will appear here when available."/>}
+        </section>
+      </div>
+    </section>
