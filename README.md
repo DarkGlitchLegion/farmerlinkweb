@@ -15,7 +15,7 @@ The Angular development server proxies `/api/v1` to `http://localhost:8000` usin
 
 ## API configuration
 
-The browser uses same-origin `/api/v1` by default. Set `window.FARMERLINK_CONFIG = { apiUrl: 'https://api.example.com/api/v1' }` before the Angular bundle loads to call a different API directly; that API must allow the web origin through CORS.
+The browser API base URL is configured in `src/environments/environment.ts`; development builds replace it with `environment.development.ts`. Both default to same-origin `/api/v1`, which avoids browser CORS restrictions through the configured proxy.
 
 For the production Node server, set `FARMERLINK_API_URL` to the API origin (for example `https://api.example.com`) and the server forwards same-origin `/api/v1` requests, including the bearer token, to that origin. The default is `http://localhost:8000`.
 
