@@ -42,10 +42,20 @@ export class ApiService {
     } catch {
       throw new ApiError(`Could not connect to FarmerLink API at ${this.baseUrl}. Check the API URL and server connection.`,0);
     }
-    if(response.status===401){this.unauthorizedHandler?.();throw new ApiError('Your session has expired. Please sign in again.',401);}
     if(!response.ok){
       let message=`Request failed (${response.status}).`;
-      try {const data=await response.json();message=typeof data.detail==='string'?data.detail:data.message??message;} catch { /* response has no JSON body */ }
+      try {
+        const data=await response.json();
+        message=typeof data.detail==='string'?data.detail:typeof data.message==='string'?data.message:message;
+      } catch { /* response has no JSON body */ }
+      if(response.status===401){
+        if(!options.anonymous){
+          this.unauthorizedHandler?.();
+          message='Your session has expired. Please sign in again.';
+        } else if(message.startsWith('Request failed')) {
+          message='Invalid email or password. Please check your credentials and try again.';
+        }
+      }
       throw new ApiError(message,response.status);
     }
     if(response.status===204)return undefined as T;
