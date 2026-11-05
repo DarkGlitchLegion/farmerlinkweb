@@ -1,0 +1,27 @@
+<div class="catalog-grid">
+      @for (record of records; track record.id) {
+        <article class="catalog-card">
+          @if (record.image) {
+            <img class="catalog-image" [src]="record.image" [alt]="record.name ?? 'Catalog image'">
+          } @else {
+            <div class="catalog-image catalog-placeholder" aria-hidden="true">{{kind === 'categories' ? '◈' : '♧'}}</div>
+          }
+          <div class="catalog-card-body">
+            <div class="catalog-card-heading">
+              <div><h2>{{record.name}}</h2><p>{{kind === 'categories' ? (record.description || 'Product category') : (record.category_name || 'Agricultural product')}}</p></div>
+              @if (record.status) { <app-status-badge [label]="record.status"/> }
+            </div>
+            @if (kind === 'products') {
+              <div class="catalog-meta"><span>{{record.farmer_name || ('Farmer #' + record.farmer_id)}}</span><b>₱{{money(record.price_per_unit)}} / {{record.unit}}</b><small>{{number(record.available_quantity)}} available</small></div>
+            } @else if (record.product_count !== undefined && record.product_count !== null) {
+              <div class="catalog-meta"><span>{{number(record.product_count)}} products</span></div>
+            }
+            <div class="catalog-actions">
+              <button type="button" (click)="view.emit(record)">View details</button>
+              <button type="button" (click)="edit.emit(record)">Edit</button>
+              @if (deletable) { <button type="button" class="danger-text" (click)="remove.emit(record)">Delete</button> }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
