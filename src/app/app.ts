@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AdminApi, AdminUser } from './admin-api';
 import { AnalyticsService } from './services/analytics_service';
@@ -18,32 +18,6 @@ import { ProfileService } from './services/profile_service';
 
 @Component({ selector: 'app-root', imports: [RouterOutlet], template: '<router-outlet />' })
 export class App {}
-
-@Component({
-  standalone: true, imports: [CommonModule, FormsModule], selector: 'admin-login',
-  template: `
-    <main class="login-page">
-      <section class="login-brand"><div class="brand-mark">🌱</div><span class="eyebrow">FARMERLINK DAVNOR</span><h1>Good food starts<br>with good connections.</h1><p>One place to support the people who grow, move, and share our food.</p><div class="login-art"><span>🌾</span><span>🥬</span><span>🍅</span><span>🌽</span></div></section>
-      <section class="login-panel"><div class="login-card"><div class="mobile-brand"><span class="brand-mark">🌱</span><b>FarmerLink</b></div><span class="eyebrow">ADMIN PORTAL</span><h2>Welcome back</h2><p class="muted">Sign in with your administrator account to continue.</p>
-        <form (ngSubmit)="signIn()"><label>Email address<input name="email" type="email" [(ngModel)]="email" autocomplete="username" placeholder="admin@example.com" required></label><label>Password<input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" placeholder="Enter your password" required></label>
-          @if (error()) { <div class="alert error">{{ error() }}</div> }
-          <button type="submit" class="button primary full" [disabled]="busy()">{{ busy() ? 'Signing in…' : 'Sign in to admin' }} <span>→</span></button>
-        </form><div class="secure-note"><span>●</span> Secure administrator access</div></div><small class="login-footer">FarmerLink · Supporting local agriculture</small></section>
-    </main>`
-})
-export class LoginPage {
-  private api = inject(AdminApi); private router = inject(Router); private route = inject(ActivatedRoute);
-  email = ''; password = ''; busy = signal(false); error = signal('');
-  async signIn() {
-    this.error.set(''); this.busy.set(true);
-    try {
-      await this.api.login(this.email.trim(), this.password);
-      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-      await this.router.navigateByUrl(returnUrl?.startsWith('/admin') ? returnUrl : '/admin');
-    } catch (error) { this.error.set(error instanceof Error ? error.message : 'Unable to sign in.'); }
-    finally { this.busy.set(false); }
-  }
-}
 
 type Field = { key: string; label: string; type?: string; choices?: string[]; required?: boolean; multiline?: boolean };
 type Module = { key: string; title: string; icon: string; fields: Field[]; create?: boolean; delete?: boolean };

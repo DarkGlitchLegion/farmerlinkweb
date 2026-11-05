@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
-import { AdminPage, LoginPage } from './app';
+import { AdminPage } from './app';
 import { adminGuard, loginGuard } from './admin-api';
+import { Authentication } from './pages/authentication/authentication';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginPage, canActivate: [loginGuard] },
+  { path: 'login', component: Authentication, canActivate: [loginGuard] },
   {
     path: 'admin', canActivate: [adminGuard], children: [
       { path: '', component: AdminPage },
