@@ -1,59 +1,22 @@
-# Farmerlinkweb
+# FarmerLink Web Admin
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.6.
+Responsive administrator portal for the FarmerLink API. The web app exposes administrator sign-in, dashboard analytics, account/resource management, notifications, and profile settings. It does not provide registration or non-admin dashboards.
 
-## Development server
+## Run locally
 
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Start the FastAPI service at `http://localhost:8000`, then run:
 
 ```bash
-ng generate component component-name
+npm install
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+The Angular development server proxies `/api/v1` to `http://localhost:8000` using `proxy.conf.json`.
 
-```bash
-ng generate --help
-```
+## API configuration
 
-## Building
+The browser uses same-origin `/api/v1` by default. Set `window.FARMERLINK_CONFIG = { apiUrl: 'https://api.example.com/api/v1' }` before the Angular bundle loads to call a different API directly; that API must allow the web origin through CORS.
 
-To build the project run:
+For the production Node server, set `FARMERLINK_API_URL` to the API origin (for example `https://api.example.com`) and the server forwards same-origin `/api/v1` requests, including the bearer token, to that origin. The default is `http://localhost:8000`.
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Build with `npm run build`; run the Angular checks with `npm test`.

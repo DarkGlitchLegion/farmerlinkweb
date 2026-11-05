@@ -12,6 +12,32 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+// Keep browser API traffic same-origin. The FastAPI service does not enable
+// cross-origin requests, so the web server forwards requests and auth headers.
+app.use('/api/v1', async (req, res, next) => {
+  const apiOrigin = process.env['FARMERLINK_API_URL'] || 'http://localhost:8000';
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(req.headers)) {
+    if (!value || ['host', 'connection', 'content-length', 'transfer-encoding'].includes(name.toLowerCase())) continue;
+    for (const entry of Array.isArray(value) ? value : [value]) headers.append(name, entry);
+  }
+  try {
+    const response = await fetch(`${apiOrigin.replace(/\/$/, '')}${req.originalUrl}`, {
+      method: req.method,
+      headers,
+      body: ['GET', 'HEAD'].includes(req.method) ? undefined : req as any,
+      ...(req.method === 'GET' || req.method === 'HEAD' ? {} : { duplex: 'half' as any }),
+    });
+    res.status(response.status);
+    response.headers.forEach((value, name) => {
+      if (!['connection', 'transfer-encoding', 'content-encoding', 'content-length'].includes(name.toLowerCase())) res.setHeader(name, value);
+    });
+    res.send(Buffer.from(await response.arrayBuffer()));
+  } catch (error) {
+    next(error);
+  }
+});
+
 /**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
