@@ -4,6 +4,17 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AdminApi, AdminUser } from './admin-api';
+import { AnalyticsService } from './services/analytics_service';
+import { AgricultureService } from './services/agriculture_service';
+import { CategoryService } from './services/category_service';
+import { CropAndPestReportService } from './services/crop_and_pest_report_service';
+import { HarvestBatchService } from './services/harvest_batch_service';
+import { MarketPriceService } from './services/market_price_service';
+import { NotificationService } from './services/notification_service';
+import { OrderItemService } from './services/order_item_service';
+import { OrderService } from './services/order_service';
+import { ProductService } from './services/product_service';
+import { ProfileService } from './services/profile_service';
 
 @Component({ selector: 'app-root', imports: [RouterOutlet], template: '<router-outlet />' })
 export class App {}
@@ -88,6 +99,11 @@ const modules: Module[] = [
 })
 export class AdminPage implements OnInit, OnDestroy {
   private api=inject(AdminApi); private router=inject(Router); private subscription?:Subscription;
+  private analyticsApi=inject(AnalyticsService); private agricultureApi=inject(AgricultureService);
+  private categoryApi=inject(CategoryService); private reportApi=inject(CropAndPestReportService);
+  private harvestApi=inject(HarvestBatchService); private marketPriceApi=inject(MarketPriceService);
+  private notificationApi=inject(NotificationService); private orderItemApi=inject(OrderItemService);
+  private orderApi=inject(OrderService); private productApi=inject(ProductService); private profileApi=inject(ProfileService);
   readonly modules=modules; readonly today=new Intl.DateTimeFormat('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date());
   section=signal('dashboard'); mode=signal<'list'|'detail'|'edit'|'create'>('list'); loading=signal(true); saving=signal(false); error=signal(''); success=signal(''); mobileMenu=signal(false);
   rows=signal<any[]>([]); filteredRows=signal<any[]>([]); selected=signal<any>(null); orderItems=signal<any[]>([]); analytics=signal<any>({}); orders=signal<any[]>([]); reports=signal<any[]>([]); pendingProfiles=signal<any[]>([]); hasNext=false; offset=0; limit=25; query=''; form:Record<string,any>={}; profileForm:Record<string,any>={};
@@ -114,18 +130,58 @@ export class AdminPage implements OnInit, OnDestroy {
       else if(module){
         if(this.mode()==='list') await this.loadRows();
         else if(this.mode()==='create') {if(!module.create)throw new Error(`${module.title} cannot be created.`);this.form={};}
-        else {const id=Number(parts[2]); const row=this.mode()==='edit'&&history.state?.row?history.state.row:await this.api.request(`/${module.key}/${id}`);this.selected.set(row);if(this.mode()==='edit')this.form=this.toForm(row,module.fields);if(module.key==='orders'&&this.mode()==='detail')this.orderItems.set(await this.api.request<any[]>(`/orders/${id}/items?offset=0&limit=100`));}
+        else {const id=Number(parts[2]); const row=this.mode()==='edit'&&history.state?.row?history.state.row:await this.getResource(module.key,id);this.selected.set(row);if(this.mode()==='edit')this.form=this.toForm(row,module.fields);if(module.key==='orders'&&this.mode()==='detail')this.orderItems.set(await this.orderItemApi.listForOrder(id,{offset:0,limit:100}));}
       } else if(['analytics','profile'].includes(this.section())) { /* built-in admin pages */ }
       else this.error.set('That admin page could not be found.');
     } catch(e){this.error.set(this.message(e));} finally {this.loading.set(false);}
   }
-  async loadDashboard(){const results=await Promise.allSettled([this.api.request('/analytics/overview'),this.api.request('/orders?offset=0&limit=5'),this.api.request('/crop-reports?offset=0&limit=5'),this.api.request('/farmer-profiles?offset=0&limit=100'),this.api.request('/business-buyer-profiles?offset=0&limit=100')]);
+  async loadDashboard(){const results=await Promise.allSettled([this.analyticsApi.overview(),this.orderApi.list({offset:0,limit:5}),this.reportApi.list({offset:0,limit:5}),this.profileApi.listFarmerProfiles({offset:0,limit:100}),this.profileApi.listBusinessProfiles({offset:0,limit:100})]);
     if(results[0].status==='rejected')throw results[0].reason;this.analytics.set(results[0].value as any);
     this.orders.set(results[1].status==='fulfilled'?results[1].value as any[]:[]);this.reports.set(results[2].status==='fulfilled'?results[2].value as any[]:[]);
     const farmers=results[3].status==='fulfilled'?results[3].value as any[]:[];const businesses=results[4].status==='fulfilled'?results[4].value as any[]:[];
     this.pendingProfiles.set([...farmers.filter(x=>x.verification_status==='pending').map(x=>({...x,name:x.farm_name,kind:'farmer'})),...businesses.filter(x=>x.verification_status==='pending').map(x=>({...x,name:x.business_name,kind:'business'}))].slice(0,5));
   }
-  async loadRows(){const data=await this.api.request<any[]>(`/${this.module()!.key}?offset=${this.offset}&limit=${this.limit+1}`);this.hasNext=data.length>this.limit;const pageRows=data.slice(0,this.limit);this.rows.set(pageRows);this.filteredRows.set(pageRows);this.filterRows();}
+  async loadRows(){const data=await this.listResource(this.module()!.key,{offset:this.offset,limit:this.limit+1});this.hasNext=data.length>this.limit;const pageRows=data.slice(0,this.limit);this.rows.set(pageRows);this.filteredRows.set(pageRows);this.filterRows();}
+  private listResource(key:string,query:{offset:number;limit:number}):Promise<any[]>{switch(key){
+    case 'users':return this.profileApi.listUsers(query); case 'categories':return this.categoryApi.list(query);
+    case 'products':return this.productApi.list(query); case 'harvest-batches':return this.harvestApi.list(query);
+    case 'farmer-profiles':return this.profileApi.listFarmerProfiles(query); case 'business-buyer-profiles':return this.profileApi.listBusinessProfiles(query);
+    case 'market-prices':return this.marketPriceApi.list(query); case 'advisories':return this.agricultureApi.list(query);
+    case 'crop-reports':return this.reportApi.list(query); case 'notifications':return this.notificationApi.list(query);
+    case 'orders':return this.orderApi.list(query); default:return Promise.reject(new Error('Unsupported admin resource.'));
+  }}
+  private getResource(key:string,id:number):Promise<any>{switch(key){
+    case 'users':return this.profileApi.getUser(id); case 'categories':return this.categoryApi.get(id);
+    case 'products':return this.productApi.get(id); case 'harvest-batches':return this.harvestApi.get(id);
+    case 'farmer-profiles':return this.profileApi.getFarmerProfile(id); case 'business-buyer-profiles':return this.profileApi.getBusinessProfile(id);
+    case 'market-prices':return this.marketPriceApi.get(id); case 'advisories':return this.agricultureApi.get(id);
+    case 'crop-reports':return this.reportApi.get(id); case 'notifications':return this.notificationApi.get(id);
+    case 'orders':return this.orderApi.get(id); default:return Promise.reject(new Error('Unsupported admin resource.'));
+  }}
+  private createResource(key:string,data:Record<string,any>):Promise<any>{switch(key){
+    case 'users':return this.profileApi.createUser(data); case 'categories':return this.categoryApi.create(data);
+    case 'products':return this.productApi.create(data); case 'harvest-batches':return this.harvestApi.create(data);
+    case 'farmer-profiles':return this.profileApi.createFarmerProfile(data); case 'business-buyer-profiles':return this.profileApi.createBusinessProfile(data);
+    case 'market-prices':return this.marketPriceApi.create(data); case 'advisories':return this.agricultureApi.create(data);
+    case 'crop-reports':return this.reportApi.create(data); case 'notifications':return this.notificationApi.create(data);
+    default:return Promise.reject(new Error('This resource cannot be created here.'));
+  }}
+  private updateResource(key:string,id:number,data:Record<string,any>):Promise<any>{switch(key){
+    case 'users':return this.profileApi.updateUser(id,data); case 'categories':return this.categoryApi.update(id,data);
+    case 'products':return this.productApi.update(id,data); case 'harvest-batches':return this.harvestApi.update(id,data);
+    case 'farmer-profiles':return this.profileApi.updateFarmerProfile(id,data); case 'business-buyer-profiles':return this.profileApi.updateBusinessProfile(id,data);
+    case 'market-prices':return this.marketPriceApi.update(id,data); case 'advisories':return this.agricultureApi.update(id,data);
+    case 'crop-reports':return this.reportApi.update(id,data); case 'notifications':return this.notificationApi.update(id,data);
+    case 'orders':return this.orderApi.update(id,data); default:return Promise.reject(new Error('Unsupported admin resource.'));
+  }}
+  private deleteResource(key:string,id:number):Promise<void>{switch(key){
+    case 'users':return this.profileApi.removeUser(id); case 'categories':return this.categoryApi.remove(id);
+    case 'products':return this.productApi.remove(id); case 'harvest-batches':return this.harvestApi.remove(id);
+    case 'farmer-profiles':return this.profileApi.removeFarmerProfile(id); case 'business-buyer-profiles':return this.profileApi.removeBusinessProfile(id);
+    case 'market-prices':return this.marketPriceApi.remove(id); case 'advisories':return this.agricultureApi.remove(id);
+    case 'crop-reports':return this.reportApi.remove(id); case 'notifications':return this.notificationApi.remove(id);
+    default:return Promise.reject(new Error('This resource cannot be deleted here.'));
+  }}
   filterRows(){const q=this.query.toLowerCase().trim();this.filteredRows.set(!q?this.rows():this.rows().filter(row=>Object.values(row).some(v=>String(v??'').toLowerCase().includes(q))));}
   async page(direction:number){this.offset=Math.max(0,this.offset+direction*this.limit);this.loading.set(true);try{await this.loadRows();}catch(e){this.error.set(this.message(e));}finally{this.loading.set(false);}}
   columns(){return this.rows().length?Object.keys(this.rows()[0]).filter(k=>!['updated_at','image','avatar','description','content','notes','delivery_address','middle_name','latitude','longitude'].includes(k)).slice(0,6):[];}
@@ -152,10 +208,10 @@ export class AdminPage implements OnInit, OnDestroy {
   toForm(row:any,fields:Field[]){const result:Record<string,any>={};for(const f of fields){let value=row[f.key]??'';if(f.type==='datetime-local'&&value)value=new Date(value).toISOString().slice(0,16);result[f.key]=value;}return result;}
   async save(){this.saving.set(true);this.error.set('');try{const module=this.module()!;const payload:Record<string,any>={};for(const field of this.editableFields()){const value=this.form[field.key];if(field.type==='image'&&this.mode()==='edit'&&value===this.selected()?.[field.key])continue;if(value!==''&&value!==undefined&&value!==null){payload[field.key]=field.type==='number'?Number(value):field.type==='datetime-local'?new Date(value).toISOString():value;}else if(this.mode()==='edit'&&value==='')payload[field.key]=null;}if(module.key==='users'&&this.mode()==='create'&&payload['middle_name']===undefined)payload['middle_name']='';
       if(module.key==='users'&&this.mode()==='edit'&&!payload['password'])delete payload['password'];
-      const id=this.selected()?.id;await this.api.request(this.mode()==='create'?`/${module.key}`:`/${module.key}/${id}`,{method:this.mode()==='create'?'POST':'PATCH',body:payload});this.router.navigate(['/admin',module.key]);
+      const id=this.selected()?.id;if(this.mode()==='create')await this.createResource(module.key,payload);else await this.updateResource(module.key,id,payload);this.router.navigate(['/admin',module.key]);
     }catch(e){this.error.set(this.message(e));}finally{this.saving.set(false);}}
-  async remove(row:any){if(!confirm(`Delete this ${this.singular().toLowerCase()}? This action cannot be undone.`))return;this.loading.set(true);try{await this.api.request(`/${this.module()!.key}/${row.id}`,{method:'DELETE'});if(this.mode()==='detail')this.goList();else await this.loadRows();}catch(e){this.error.set(this.message(e));}finally{this.loading.set(false);}}
-  async saveProfile(){this.saving.set(true);this.error.set('');this.success.set('');try{const payload={...this.profileForm};if(!payload['password'])delete payload['password'];if(payload['avatar']===this.api.user()?.avatar)delete payload['avatar'];const updated=await this.api.request<AdminUser>(`/users/${this.api.user()!.id}`,{method:'PATCH',body:payload});this.api.user.set(updated);this.success.set('Your profile has been updated.');}catch(e){this.error.set(this.message(e));}finally{this.saving.set(false);}}
+  async remove(row:any){if(!confirm(`Delete this ${this.singular().toLowerCase()}? This action cannot be undone.`))return;this.loading.set(true);try{await this.deleteResource(this.module()!.key,row.id);if(this.mode()==='detail')this.goList();else await this.loadRows();}catch(e){this.error.set(this.message(e));}finally{this.loading.set(false);}}
+  async saveProfile(){this.saving.set(true);this.error.set('');this.success.set('');try{const payload={...this.profileForm};if(!payload['password'])delete payload['password'];if(payload['avatar']===this.api.user()?.avatar)delete payload['avatar'];const updated=await this.profileApi.updateUser(this.api.user()!.id,payload);this.api.user.set(updated);this.success.set('Your profile has been updated.');}catch(e){this.error.set(this.message(e));}finally{this.saving.set(false);}}
   profilePayload(user:AdminUser){return {first_name:user.first_name,middle_name:user.middle_name??'',last_name:user.last_name,email:user.email,phone:user.phone,avatar:user.avatar??null,password:''};}
   async signOut(){this.api.logout();await this.router.navigate(['/login']);}
   private message(e:unknown){return e instanceof Error?e.message:'Something went wrong. Please try again.';}
