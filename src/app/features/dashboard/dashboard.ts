@@ -8,9 +8,13 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 
 @Component({selector:'app-dashboard-page',standalone:true,imports:[CommonModule,RouterLink,StatCardComponent,StatusBadgeComponent,UserAvatarComponent,EmptyStateComponent],styleUrl:'./dashboard.css',templateUrl:'./dashboard.html'})
 export class DashboardPageComponent {
-  @Input() metrics:any[]=[];@Input() orders:any[]=[];@Input() pendingProfiles:any[]=[];@Input() reports:any[]=[];@Input() recentUsers:any[]=[];@Input() firstName='Administrator';@Output() refresh=new EventEmitter<void>();
+  @Input() metrics:any[]=[];@Input() analytics:any={};@Input() orders:any[]=[];@Input() pendingProfiles:any[]=[];@Input() reports:any[]=[];@Input() recentUsers:any[]=[];@Input() firstName='Administrator';@Output() refresh=new EventEmitter<void>();
   readonly today=new Intl.DateTimeFormat('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date());
   greeting(){const h=new Date().getHours();return `${h<12?'GOOD MORNING':h<18?'GOOD AFTERNOON':'GOOD EVENING'}, ADMINISTRATOR`;}
   date(value:any){if(!value)return '—';const date=new Date(value);return Number.isNaN(date.valueOf())?'—':new Intl.DateTimeFormat('en-PH',{month:'short',day:'numeric',year:'numeric'}).format(date);}
   label(value:any){return String(value??'—').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());}
+  orderStatuses():[string,number][]{const value=this.analytics?.orders?.by_status;return value&&typeof value==='object'?Object.entries(value).map(([key,count])=>[key,Number(count)]):[];}
+  orderStatusWidth(value:number){return value/Math.max(1,...this.orderStatuses().map(([,count])=>count))*100;}
+  count(value:any){return Number(value??0).toLocaleString('en-PH');}
+  money(value:any){return Number(value??0).toLocaleString('en-PH',{maximumFractionDigits:2});}
 }
