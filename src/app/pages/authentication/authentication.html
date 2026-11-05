@@ -1,1 +1,71 @@
-<p>authentication works!</p>
+<main class="auth-layout">
+  <section class="brand-panel" aria-label="FarmerLink">
+    <div class="brand-panel-inner">
+      <a class="brand-lockup" routerLink="/login" aria-label="FarmerLink admin home">
+        <span class="brand-symbol" aria-hidden="true">f</span>
+        <span>farmer<span>link</span><small>DAVNOR ADMIN</small></span>
+      </a>
+
+      <div class="brand-copy">
+        <span class="overline"><i></i> SUPPORTING LOCAL AGRICULTURE</span>
+        <h1>Good things<br />grow <em>together.</em></h1>
+        <p>Keep the marketplace moving. Your tools to support farmers, strengthen communities, and bring fresh harvests to more people.</p>
+      </div>
+
+      <div class="field-art" aria-hidden="true">
+        <div class="sun"></div>
+        <div class="hill hill-back"></div>
+        <div class="hill hill-front"></div>
+        <div class="field-row row-one"></div>
+        <div class="field-row row-two"></div>
+        <div class="field-row row-three"></div>
+        <span class="art-leaf leaf-one">✦</span><span class="art-leaf leaf-two">✦</span>
+      </div>
+      <div class="brand-foot"><span>GROWN WITH CARE</span><span>◦</span><span>CONNECTED BY FARMERLINK</span></div>
+    </div>
+  </section>
+
+  <section class="sign-in-panel">
+    <div class="sign-in-content">
+      <div class="mobile-brand-lockup">
+        <span class="brand-symbol" aria-hidden="true">f</span><span>farmer<span>link</span></span>
+      </div>
+
+      <div class="welcome-heading">
+        <span class="section-kicker">ADMINISTRATOR ACCESS</span>
+        <h2>Welcome back</h2>
+        <p>Sign in to manage FarmerLink’s marketplace.</p>
+      </div>
+
+      <form class="auth-form" (ngSubmit)="signIn()">
+        <label class="form-label" for="admin-email">Email address</label>
+        <div class="input-wrap">
+          <span class="input-icon" aria-hidden="true">✉</span>
+          <input id="admin-email" name="email" type="email" [(ngModel)]="email" autocomplete="username" placeholder="name@example.com" required />
+        </div>
+
+        <div class="password-label-row">
+          <label class="form-label" for="admin-password">Password</label>
+        </div>
+        <div class="input-wrap">
+          <span class="input-icon lock-icon" aria-hidden="true">▣</span>
+          <input id="admin-password" name="password" [type]="passwordVisible() ? 'text' : 'password'" [(ngModel)]="password" autocomplete="current-password" placeholder="Enter your password" required />
+          <button class="password-toggle" type="button" (click)="passwordVisible.set(!passwordVisible())" [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'">{{ passwordVisible() ? 'Hide' : 'Show' }}</button>
+        </div>
+
+        @if (error()) {
+          <div class="auth-error" role="alert"><span aria-hidden="true">!</span>{{ error() }}</div>
+        }
+
+        <button class="submit-button" type="submit" [disabled]="busy()">
+          <span>{{ busy() ? 'Signing in…' : 'Sign in to your account' }}</span><span class="arrow" aria-hidden="true">↗</span>
+        </button>
+      </form>
+
+      <div class="security-note"><span class="shield" aria-hidden="true">✓</span><span>Administrator-only access</span><i></i><span>Secure connection</span></div>
+      <div class="endpoint-note"><span class="endpoint-dot"></span> Authentication via <code>POST /api/v1/auth/login</code></div>
+    </div>
+
+    <footer class="page-footer"><span>© {{ currentYear }} FarmerLink DAVNOR</span><span>Growing stronger, together.</span></footer>
+  </section>
+</main>

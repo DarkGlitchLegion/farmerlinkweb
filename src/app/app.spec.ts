@@ -25,7 +25,7 @@ describe('FarmerLink admin app', () => {
     fixture.detectChanges();
     const html = fixture.nativeElement as HTMLElement;
     expect(html.querySelector('h2')?.textContent).toContain('Welcome back');
-    expect(html.querySelector('button[type="submit"]')?.textContent).toContain('Sign in to admin');
+    expect(html.querySelector('button[type="submit"]')?.textContent).toContain('Sign in to your account');
     expect(html.textContent).not.toContain('Create account');
   });
 });
