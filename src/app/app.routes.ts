@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AdminPage } from './app';
 import { adminGuard, loginGuard } from './admin-api';
-import { Authentication } from './pages/authentication/authentication';
+import { Authentication } from './features/authentication/authentication';
 
 export const routes: Routes = [
   { path: 'login', component: Authentication, canActivate: [loginGuard] },
