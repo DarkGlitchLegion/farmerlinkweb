@@ -1,22 +1,139 @@
-<section>
-      <header class="catalog-intro"><div><span class="eyebrow">MARKETPLACE</span><h1>Catalog overview</h1><p>Review products, categories, and harvest inventory from one place.</p></div></header>
-      <div class="catalog-stats">
-        <app-stat-card label="Products" [value]="metric(analytics?.catalog?.products_total)" icon="▣" tone="green" context="All marketplace listings"/>
-        <app-stat-card label="Active inventory" [value]="metric(analytics?.catalog?.active_product_quantity)" icon="♧" tone="gold" context="Available product units"/>
-        <app-stat-card label="Categories retrieved" [value]="categories.length.toLocaleString()" icon="◈" tone="blue" context="Up to 500 API records"/>
-        <app-stat-card label="Recent batches" [value]="batches.length.toLocaleString()" icon="▤" tone="rose" context="Latest API records"/>
+<section class="catalog-overview-page">
+  <app-page-header
+    eyebrow="MARKETPLACE"
+    title="Catalog Overview"
+    description="Centralized administration for products, agricultural categories, and harvest batch inventory."
+  />
+
+  <div class="stats-grid">
+    <app-stat-card
+      label="Total Products"
+      [value]="metric(analytics?.catalog?.products_total)"
+      icon="products"
+      tone="green"
+      context="All listings"
+    />
+    <app-stat-card
+      label="Active Inventory"
+      [value]="metric(analytics?.catalog?.active_product_quantity)"
+      icon="harvest-batches"
+      tone="gold"
+      context="Available units"
+    />
+    <app-stat-card
+      label="Categories"
+      [value]="categories.length.toLocaleString()"
+      icon="categories"
+      tone="blue"
+      context="Active classifications"
+    />
+    <app-stat-card
+      label="Harvest Batches"
+      [value]="batches.length.toLocaleString()"
+      icon="harvest-batches"
+      tone="rose"
+      context="Recent batches"
+    />
+  </div>
+
+  <!-- Direct Navigation Cards -->
+  <nav class="catalog-quick-nav" aria-label="Catalog sections">
+    <a routerLink="/admin/products" class="quick-nav-card">
+      <div class="nav-card-icon green">
+        <app-icon name="products" [size]="20" />
       </div>
-      <nav class="catalog-links" aria-label="Catalog management pages">
-        <a routerLink="/admin/products"><span>▣</span><div><b>Products</b><small>Manage marketplace listings and prices</small></div><i>→</i></a>
-        <a routerLink="/admin/categories"><span>◈</span><div><b>Categories</b><small>Organize the marketplace catalog</small></div><i>→</i></a>
-        <a routerLink="/admin/harvest-batches"><span>♧</span><div><b>Harvest batches</b><small>Track produce quantities and availability</small></div><i>→</i></a>
-      </nav>
-      <div class="catalog-recent-grid">
-        <section class="panel"><div class="panel-heading"><div><h2>Recently added products</h2><p>Latest records returned by the products endpoint</p></div><a routerLink="/admin/products">Manage products →</a></div>
-          @if(products.length){<div class="recent-list">@for(product of products.slice(0,5);track product.id){<a [routerLink]="'/admin/products/'+product.id"><span class="recent-mark">▣</span><span><b>{{product.name}}</b><small>{{product.category_name||'Marketplace product'}} · {{product.status||'Status unavailable'}}</small></span><strong>₱{{money(product.price_per_unit)}}</strong></a>}</div>}@else{<app-empty-state title="No product records" description="Products will appear here when the API returns them."/>}
-        </section>
-        <section class="panel"><div class="panel-heading"><div><h2>Recent harvest batches</h2><p>Latest inventory records returned by the API</p></div><a routerLink="/admin/harvest-batches">Manage batches →</a></div>
-          @if(batches.length){<div class="recent-list">@for(batch of batches.slice(0,5);track batch.id){<a [routerLink]="'/admin/harvest-batches/'+batch.id"><span class="recent-mark">♧</span><span><b>{{batch.batch_code||'Harvest batch #'+batch.id}}</b><small>{{batch.product_name||'Product #'+batch.product_id}} · {{batch.status}}</small></span><strong>{{number(batch.remaining_quantity)}} available</strong></a>}</div>}@else{<app-empty-state title="No harvest batches" description="Batch inventory will appear here when available."/>}
-        </section>
+      <div class="nav-card-text">
+        <strong class="nav-card-title">Manage Products</strong>
+        <span class="nav-card-sub">Browse listings, update pricing, and audit inventory availability</span>
       </div>
+      <app-icon name="arrow-right" [size]="16" class="nav-card-arrow" />
+    </a>
+
+    <a routerLink="/admin/categories" class="quick-nav-card">
+      <div class="nav-card-icon blue">
+        <app-icon name="categories" [size]="20" />
+      </div>
+      <div class="nav-card-text">
+        <strong class="nav-card-title">Product Categories</strong>
+        <span class="nav-card-sub">Structure agricultural taxonomy and produce classification</span>
+      </div>
+      <app-icon name="arrow-right" [size]="16" class="nav-card-arrow" />
+    </a>
+
+    <a routerLink="/admin/harvest-batches" class="quick-nav-card">
+      <div class="nav-card-icon gold">
+        <app-icon name="harvest-batches" [size]="20" />
+      </div>
+      <div class="nav-card-text">
+        <strong class="nav-card-title">Harvest Batches</strong>
+        <span class="nav-card-sub">Track farm-level harvest dates, quantities, and expiration schedules</span>
+      </div>
+      <app-icon name="arrow-right" [size]="16" class="nav-card-arrow" />
+    </a>
+  </nav>
+
+  <!-- Side-by-Side Recent Records -->
+  <div class="recent-records-grid">
+    <!-- Recent Products -->
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Recently added products</h2>
+          <p>Latest listings recorded on the marketplace</p>
+        </div>
+        <a routerLink="/admin/products">View all →</a>
+      </div>
+      @if (products.length) {
+        <div class="records-list">
+          @for (product of products.slice(0, 5); track product.id) {
+            <a [routerLink]="'/admin/products/' + product.id" class="record-item">
+              <div class="record-icon-wrap">
+                <app-icon name="products" [size]="16" />
+              </div>
+              <div class="record-info">
+                <span class="record-title">{{ product.name }}</span>
+                <span class="record-sub">
+                  {{ product.category_name || 'Agricultural commodity' }} · {{ product.status || 'Active' }}
+                </span>
+              </div>
+              <strong class="record-price">₱{{ money(product.price_per_unit) }}</strong>
+            </a>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No products recorded" description="New product listings will appear here." icon="products" />
+      }
     </section>
+
+    <!-- Recent Harvest Batches -->
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Recent harvest batches</h2>
+          <p>Latest farm produce batches recorded</p>
+        </div>
+        <a routerLink="/admin/harvest-batches">View all →</a>
+      </div>
+      @if (batches.length) {
+        <div class="records-list">
+          @for (batch of batches.slice(0, 5); track batch.id) {
+            <a [routerLink]="'/admin/harvest-batches/' + batch.id" class="record-item">
+              <div class="record-icon-wrap gold">
+                <app-icon name="harvest-batches" [size]="16" />
+              </div>
+              <div class="record-info">
+                <span class="record-title">{{ batch.batch_code || 'Batch #' + batch.id }}</span>
+                <span class="record-sub">
+                  {{ batch.product_name || 'Product #' + batch.product_id }} · {{ batch.status }}
+                </span>
+              </div>
+              <strong class="record-stock">{{ number(batch.remaining_quantity) }} available</strong>
+            </a>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No harvest batches" description="Farm harvest batches will appear here." icon="harvest-batches" />
+      }
+    </section>
+  </div>
+</section>
