@@ -31,7 +31,7 @@
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
-              "allowedHosts": []
+              "allowedHosts": ["*"]
             },
             "ssr": {
               "entry": "src/server.ts"
@@ -70,7 +70,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "proxyConfig": "proxy.conf.json"
+            "proxyConfig": "proxy.conf.json",
+            "allowedHosts": true
           },
           "configurations": {
             "production": {

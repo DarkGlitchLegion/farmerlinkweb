@@ -12,6 +12,17 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', req.header('Access-Control-Request-Headers') || 'Authorization, Content-Type');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
+
 // Keep browser API traffic same-origin. The FastAPI service does not enable
 // cross-origin requests, so the web server forwards requests and auth headers.
 app.use('/api/v1', async (req, res, next) => {
