@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
@@ -10,15 +11,9 @@ export class ApiError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
 }
 
-declare global {
-  interface Window { FARMERLINK_CONFIG?: { apiUrl?: string }; }
-}
-
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  readonly baseUrl = typeof window !== 'undefined'
-    ? (window.FARMERLINK_CONFIG?.apiUrl || '/api/v1').replace(/\/$/, '')
-    : '/api/v1';
+  readonly baseUrl = environment.apiUrl.replace(/\/$/, '');
   private accessToken: string | null = null;
   private unauthorizedHandler?: () => void;
 
