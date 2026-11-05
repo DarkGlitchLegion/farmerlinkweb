@@ -50,19 +50,17 @@ import { AppIconComponent } from '../app-icon/app-icon';
         align-items: center;
         justify-content: center;
         padding: 20px;
-        background: rgba(20, 32, 24, 0.45);
+        background: rgba(0, 0, 0, 0.65);
         backdrop-filter: blur(4px);
         animation: fadeIn 0.15s ease-out;
       }
       .dialog-card {
         width: 100%;
         max-width: 420px;
-        background: #ffffff;
-        border: 1px solid #e7ece8;
-        border-radius: 14px;
-        box-shadow:
-          0 20px 40px -10px rgba(18, 38, 27, 0.2),
-          0 4px 12px rgba(0, 0, 0, 0.05);
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-popover);
         padding: 24px;
         animation: scaleUp 0.15s ease-out;
       }
@@ -78,8 +76,8 @@ import { AppIconComponent } from '../app-icon/app-icon';
         width: 40px;
         height: 40px;
         border-radius: 10px;
-        background: #fdf0f0;
-        color: #dc4c4c;
+        background: var(--color-danger-bg);
+        color: var(--color-danger);
         flex-shrink: 0;
       }
       .dialog-titles {
@@ -90,13 +88,13 @@ import { AppIconComponent } from '../app-icon/app-icon';
         margin: 0 0 6px;
         font-size: 16px;
         font-weight: 650;
-        color: #202a24;
+        color: var(--color-text-primary);
         letter-spacing: -0.01em;
       }
       .dialog-message {
         margin: 0;
         font-size: 13px;
-        color: #748078;
+        color: var(--color-text-secondary);
         line-height: 1.5;
       }
       .dialog-actions {
@@ -111,7 +109,7 @@ import { AppIconComponent } from '../app-icon/app-icon';
         justify-content: center;
         gap: 6px;
         padding: 8px 16px;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
@@ -124,16 +122,16 @@ import { AppIconComponent } from '../app-icon/app-icon';
         cursor: not-allowed;
       }
       .btn-secondary {
-        background: #ffffff;
-        border-color: #e7ece8;
-        color: #556259;
+        background: var(--color-bg-card);
+        border-color: var(--color-border);
+        color: var(--color-text-primary);
       }
       .btn-secondary:hover:not(:disabled) {
-        background: #f7f9f7;
-        border-color: #d8e0da;
+        background: var(--color-bg-secondary);
+        border-color: var(--color-border-hover);
       }
       .btn-danger {
-        background: #dc4c4c;
+        background: var(--color-danger);
         color: #ffffff;
       }
       .btn-danger:hover:not(:disabled) {

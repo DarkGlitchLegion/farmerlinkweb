@@ -41,8 +41,8 @@ import { AppIconComponent } from '../app-icon/app-icon';
         width: 48px;
         height: 48px;
         border-radius: 12px;
-        background: #f0f4f1;
-        color: #748078;
+        background: var(--color-bg-secondary);
+        color: var(--color-text-secondary);
         margin-bottom: 14px;
       }
       .icon-fallback {
@@ -53,12 +53,12 @@ import { AppIconComponent } from '../app-icon/app-icon';
         margin: 0 0 6px;
         font-size: 14px;
         font-weight: 600;
-        color: #202a24;
+        color: var(--color-text-primary);
       }
       .empty-description {
         margin: 0;
         font-size: 13px;
-        color: #748078;
+        color: var(--color-text-secondary);
         max-width: 360px;
         line-height: 1.5;
       }

@@ -33,22 +33,22 @@ import { AppIconComponent } from '../app-icon/app-icon';
       }
       .stat-card {
         padding: 16px 18px;
-        background: #ffffff;
-        border: 1px solid #e7ece8;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(32, 42, 36, 0.04);
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
         transition:
           border-color 0.15s ease,
           box-shadow 0.15s ease,
-          transform 0.15s ease;
+          background-color 0.18s ease;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         min-height: 116px;
       }
       .stat-card:hover {
-        border-color: #d3ded6;
-        box-shadow: 0 4px 12px rgba(32, 42, 36, 0.06);
+        border-color: var(--color-border-hover);
+        box-shadow: var(--shadow-hover);
       }
       .stat-header {
         display: flex;
@@ -65,24 +65,24 @@ import { AppIconComponent } from '../app-icon/app-icon';
         height: 34px;
         border-radius: 8px;
         flex-shrink: 0;
-        background: #e8f3ec;
-        color: #176b45;
+        background: var(--color-primary-light);
+        color: var(--color-primary);
       }
       .stat-icon-wrap.green {
-        background: #e8f3ec;
-        color: #176b45;
+        background: var(--color-primary-light);
+        color: var(--color-primary);
       }
       .stat-icon-wrap.gold {
-        background: #fef5e7;
-        color: #a46408;
+        background: var(--color-warning-bg);
+        color: var(--color-warning);
       }
       .stat-icon-wrap.blue {
-        background: #edf5fc;
-        color: #276ea9;
+        background: var(--color-info-bg);
+        color: var(--color-info);
       }
       .stat-icon-wrap.rose {
-        background: #fdf0f0;
-        color: #be3939;
+        background: var(--color-danger-bg);
+        color: var(--color-danger);
       }
       .icon-fallback {
         font-size: 14px;
@@ -90,11 +90,11 @@ import { AppIconComponent } from '../app-icon/app-icon';
       }
       .stat-context {
         font-size: 11px;
-        color: #748078;
-        background: #f7f9f7;
+        color: var(--color-text-secondary);
+        background: var(--color-bg-secondary);
         padding: 2px 7px;
         border-radius: 6px;
-        border: 1px solid #edf1ee;
+        border: 1px solid var(--color-border-subtle);
         max-width: 140px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -109,13 +109,13 @@ import { AppIconComponent } from '../app-icon/app-icon';
         font-size: 24px;
         font-weight: 700;
         letter-spacing: -0.03em;
-        color: #202a24;
+        color: var(--color-text-primary);
         line-height: 1.15;
       }
       .stat-label {
         font-size: 12px;
         font-weight: 500;
-        color: #748078;
+        color: var(--color-text-secondary);
         line-height: 1.3;
       }
     `,

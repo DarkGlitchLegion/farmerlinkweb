@@ -74,19 +74,19 @@ import { AppIconComponent } from '../app-icon/app-icon';
         align-items: center;
         gap: 14px;
         padding: 14px 16px;
-        border: 1.5px dashed #cfd9d2;
-        border-radius: 10px;
-        background: #fafcfb;
+        border: 1.5px dashed var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-bg-main);
         cursor: pointer;
         transition: all 0.15s ease;
       }
       .drop-zone:hover {
-        border-color: #2f9d65;
-        background: #f4f8f5;
+        border-color: var(--color-primary-fresh);
+        background: var(--color-bg-secondary);
       }
       .drop-zone.has-error {
-        border-color: #dc4c4c;
-        background: #fff8f8;
+        border-color: var(--color-danger);
+        background: var(--color-danger-bg);
       }
       .upload-icon-circle {
         display: inline-flex;
@@ -95,8 +95,8 @@ import { AppIconComponent } from '../app-icon/app-icon';
         width: 38px;
         height: 38px;
         border-radius: 8px;
-        background: #e8f3ec;
-        color: #176b45;
+        background: var(--color-primary-light);
+        color: var(--color-primary);
         flex-shrink: 0;
       }
       .upload-text {
@@ -107,11 +107,11 @@ import { AppIconComponent } from '../app-icon/app-icon';
       .upload-prompt {
         font-size: 13px;
         font-weight: 600;
-        color: #176b45;
+        color: var(--color-primary);
       }
       .upload-hint {
         font-size: 11px;
-        color: #748078;
+        color: var(--color-text-secondary);
       }
       .preview-container {
         position: relative;
@@ -119,16 +119,16 @@ import { AppIconComponent } from '../app-icon/app-icon';
         align-items: center;
         gap: 16px;
         padding: 10px;
-        border: 1px solid #e7ece8;
-        border-radius: 10px;
-        background: #ffffff;
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background: var(--color-bg-card);
       }
       .preview-img {
         width: 72px;
         height: 72px;
         border-radius: 8px;
         object-fit: cover;
-        border: 1px solid #e7ece8;
+        border: 1px solid var(--color-border);
         flex-shrink: 0;
       }
       .preview-overlay {
@@ -141,27 +141,26 @@ import { AppIconComponent } from '../app-icon/app-icon';
         align-items: center;
         gap: 6px;
         padding: 6px 12px;
-        border-radius: 6px;
+        border-radius: var(--radius-xs);
         font-size: 12px;
         font-weight: 550;
         cursor: pointer;
-        background: #f0f4f1;
-        color: #435147;
-        border: 1px solid #e2e8e4;
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+        border: 1px solid var(--color-border);
         transition: all 0.15s ease;
       }
       .action-btn:hover {
-        background: #e5ece7;
-        color: #202a24;
+        background: var(--color-bg-subtle);
+        border-color: var(--color-border-hover);
       }
       .action-btn.danger {
-        background: #fdf0f0;
-        color: #be3939;
-        border-color: #f7d2d2;
+        background: var(--color-danger-bg);
+        color: var(--color-danger);
+        border-color: rgba(220, 76, 76, 0.2);
       }
       .action-btn.danger:hover {
-        background: #fce4e4;
-        color: #a82e2e;
+        background: rgba(220, 76, 76, 0.2);
       }
       .error-text {
         display: flex;
@@ -169,7 +168,7 @@ import { AppIconComponent } from '../app-icon/app-icon';
         gap: 6px;
         margin: 6px 0 0;
         font-size: 11px;
-        color: #dc4c4c;
+        color: var(--color-danger);
       }
     `,
   ],

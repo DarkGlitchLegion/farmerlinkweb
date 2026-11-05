@@ -29,7 +29,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #176b45;
+  color: var(--color-primary);
   margin-bottom: 4px;
 }
 
@@ -38,14 +38,14 @@
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.03em;
-  color: #202a24;
+  color: var(--color-text-primary);
   line-height: 1.2;
 }
 
 .welcome-subtitle {
   margin: 0;
   font-size: 13px;
-  color: #748078;
+  color: var(--color-text-secondary);
 }
 
 .welcome-actions {
@@ -59,12 +59,12 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: #ffffff;
-  border: 1px solid #e7ece8;
-  border-radius: 8px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 500;
-  color: #556259;
+  color: var(--color-text-secondary);
 }
 
 /* Quick Actions Strip */
@@ -73,17 +73,17 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: #ffffff;
-  border: 1px solid #e7ece8;
-  border-radius: 10px;
-  box-shadow: 0 1px 2px rgba(32, 42, 36, 0.02);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
   flex-wrap: wrap;
 }
 
 .quick-title {
   font-size: 12px;
   font-weight: 600;
-  color: #748078;
+  color: var(--color-text-secondary);
 }
 
 .quick-chips {
@@ -98,19 +98,19 @@
   align-items: center;
   gap: 5px;
   padding: 5px 10px;
-  background: #f7f9f7;
-  border: 1px solid #e7ece8;
-  border-radius: 6px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
   font-size: 12px;
   font-weight: 550;
-  color: #4b5850;
+  color: var(--color-text-primary);
   transition: all 0.15s ease;
 }
 
 .quick-chip:hover {
-  background: #e8f3ec;
-  border-color: #c9ded0;
-  color: #176b45;
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* KPI Grid */
@@ -150,7 +150,7 @@
 .pipeline-label {
   font-size: 12.5px;
   font-weight: 500;
-  color: #556259;
+  color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -158,14 +158,14 @@
 
 .pipeline-track {
   height: 8px;
-  background: #f0f4f1;
+  background: var(--color-bg-secondary);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .pipeline-fill {
   height: 100%;
-  background: #176b45;
+  background: var(--color-primary);
   border-radius: inherit;
   transition: width 0.3s ease;
 }
@@ -173,7 +173,7 @@
 .pipeline-count {
   font-size: 12.5px;
   font-weight: 600;
-  color: #202a24;
+  color: var(--color-text-primary);
   text-align: right;
 }
 
@@ -189,7 +189,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 4px;
-  border-bottom: 1px solid #edf1ee;
+  border-bottom: 1px solid var(--color-border-subtle);
 }
 
 .leaderboard-item:last-child {
@@ -203,8 +203,8 @@
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  background: #e8f3ec;
-  color: #176b45;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
   font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
@@ -215,7 +215,7 @@
   height: 34px;
   border-radius: 6px;
   object-fit: cover;
-  border: 1px solid #e7ece8;
+  border: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
@@ -226,8 +226,8 @@
   width: 34px;
   height: 34px;
   border-radius: 6px;
-  background: #f0f4f1;
-  color: #748078;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   flex-shrink: 0;
 }
 
@@ -242,7 +242,7 @@
 .product-name {
   font-size: 13px;
   font-weight: 600;
-  color: #202a24;
+  color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -250,13 +250,13 @@
 
 .product-meta {
   font-size: 11px;
-  color: #748078;
+  color: var(--color-text-secondary);
 }
 
 .product-sales {
   font-size: 13px;
   font-weight: 650;
-  color: #176b45;
+  color: var(--color-primary);
   white-space: nowrap;
 }
 
@@ -282,19 +282,19 @@
 
 .data-table th {
   padding: 10px 16px;
-  background: #f8faf8;
-  color: #748078;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   font-size: 11px;
   font-weight: 650;
   letter-spacing: 0.04em;
-  border-bottom: 1px solid #e7ece8;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .data-table td {
   padding: 12px 16px;
-  border-bottom: 1px solid #edf1ee;
+  border-bottom: 1px solid var(--color-border-subtle);
   font-size: 12.5px;
-  color: #556259;
+  color: var(--color-text-secondary);
 }
 
 .data-table tbody tr {
@@ -302,20 +302,20 @@
 }
 
 .data-table tbody tr:hover {
-  background: #f9fbf9;
+  background: var(--color-bg-secondary);
 }
 
 .order-id {
   font-weight: 650;
-  color: #202a24;
+  color: var(--color-text-primary);
 }
 
 .buyer-id {
-  color: #556259;
+  color: var(--color-text-secondary);
 }
 
 .date-text {
-  color: #748078;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 
@@ -329,7 +329,7 @@
   gap: 4px;
   font-size: 12px;
   font-weight: 600;
-  color: #176b45;
+  color: var(--color-primary);
 }
 
 .action-link:hover {
@@ -347,7 +347,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 18px;
-  border-bottom: 1px solid #edf1ee;
+  border-bottom: 1px solid var(--color-border-subtle);
   transition: background-color 0.12s ease;
 }
 
@@ -356,7 +356,7 @@
 }
 
 .activity-card:hover {
-  background: #f9fbf9;
+  background: var(--color-bg-secondary);
 }
 
 .activity-icon {
@@ -366,19 +366,19 @@
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: #e8f3ec;
-  color: #176b45;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .activity-icon.business {
-  background: #fef5e7;
-  color: #a46408;
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
 }
 
 .activity-icon.warning {
-  background: #fdf0f0;
-  color: #be3939;
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
 }
 
 .activity-text {
@@ -392,7 +392,7 @@
 .activity-title {
   font-size: 13px;
   font-weight: 600;
-  color: #202a24;
+  color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -400,7 +400,7 @@
 
 .activity-subtitle {
   font-size: 11.5px;
-  color: #748078;
+  color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -418,7 +418,7 @@
   align-items: center;
   gap: 10px;
   padding: 24px 20px;
-  color: #16a36a;
+  color: var(--color-success);
   font-size: 13px;
   font-weight: 500;
   justify-content: center;

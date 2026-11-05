@@ -51,7 +51,7 @@ import { AppIconComponent } from '../app-icon/app-icon';
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #176b45;
+        color: var(--color-primary);
         margin-bottom: 4px;
       }
       .header-title {
@@ -59,13 +59,13 @@ import { AppIconComponent } from '../app-icon/app-icon';
         font-size: 24px;
         font-weight: 700;
         letter-spacing: -0.03em;
-        color: #202a24;
+        color: var(--color-text-primary);
         line-height: 1.2;
       }
       .header-desc {
         margin: 0;
         font-size: 13px;
-        color: #748078;
+        color: var(--color-text-secondary);
         line-height: 1.5;
         max-width: 640px;
       }
@@ -81,7 +81,7 @@ import { AppIconComponent } from '../app-icon/app-icon';
         justify-content: center;
         gap: 6px;
         padding: 8px 14px;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
@@ -90,11 +90,11 @@ import { AppIconComponent } from '../app-icon/app-icon';
         white-space: nowrap;
       }
       .btn-primary {
-        background: #176b45;
-        color: #ffffff;
+        background: var(--color-primary);
+        color: var(--color-primary-text);
       }
       .btn-primary:hover {
-        background: #125637;
+        background: var(--color-primary-hover);
         box-shadow: 0 2px 6px rgba(23, 107, 69, 0.2);
       }
       @media (max-width: 640px) {
@@ -118,4 +118,3 @@ export class PageHeaderComponent {
   @Input() actionLabel = '';
   @Output() action = new EventEmitter<void>();
 }
-

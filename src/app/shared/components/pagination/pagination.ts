@@ -52,15 +52,15 @@ import { AppIconComponent } from '../app-icon/app-icon';
         justify-content: space-between;
         gap: 12px;
         padding: 12px 18px;
-        border-top: 1px solid #edf1ee;
+        border-top: 1px solid var(--color-border-subtle);
         font-size: 12px;
-        color: #748078;
-        background: #ffffff;
+        color: var(--color-text-secondary);
+        background: var(--color-bg-card);
         border-radius: 0 0 12px 12px;
       }
       .num {
         font-weight: 600;
-        color: #202a24;
+        color: var(--color-text-primary);
       }
       .pagination-nav {
         display: flex;
@@ -72,19 +72,18 @@ import { AppIconComponent } from '../app-icon/app-icon';
         align-items: center;
         gap: 4px;
         padding: 6px 12px;
-        background: #ffffff;
-        border: 1px solid #e7ece8;
-        border-radius: 6px;
-        color: #556259;
+        background: var(--color-bg-card);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-xs);
+        color: var(--color-text-primary);
         font-size: 12px;
         font-weight: 550;
         cursor: pointer;
         transition: all 0.15s ease;
       }
       .page-btn:hover:not(:disabled) {
-        background: #f7f9f7;
-        border-color: #d1dbd4;
-        color: #202a24;
+        background: var(--color-bg-secondary);
+        border-color: var(--color-border-hover);
       }
       .page-btn:disabled {
         opacity: 0.45;
@@ -111,4 +110,3 @@ export class PaginationComponent {
   @Input() hasNext = false;
   @Output() pageChange = new EventEmitter<number>();
 }
-

@@ -8,12 +8,15 @@
   --color-primary-hover: #125637;
   --color-primary-light: #e8f3ec;
   --color-primary-fresh: #2f9d65;
+  --color-primary-text: #ffffff;
 
   /* Surfaces & Backgrounds */
   --color-bg-main: #f7f9f7;
   --color-bg-card: #ffffff;
   --color-bg-secondary: #f0f4f1;
   --color-bg-subtle: #fafcfb;
+  --color-bg-sidebar: #ffffff;
+  --color-bg-topbar: rgba(255, 255, 255, 0.94);
 
   /* Typography */
   --color-text-primary: #202a24;
@@ -54,6 +57,51 @@
   --topbar-height: 60px;
 }
 
+[data-theme='dark'],
+.dark {
+  color-scheme: dark;
+
+  /* Primary Brand (Comfortable Green in Dark Mode) */
+  --color-primary: #48b77b;
+  --color-primary-hover: #5ec48e;
+  --color-primary-light: rgba(72, 183, 123, 0.16);
+  --color-primary-fresh: #48b77b;
+  --color-primary-text: #0e1e15;
+
+  /* Surfaces & Backgrounds */
+  --color-bg-main: #111714;
+  --color-bg-card: #1c2620;
+  --color-bg-secondary: #222e27;
+  --color-bg-subtle: #17201a;
+  --color-bg-sidebar: #171f1a;
+  --color-bg-topbar: rgba(23, 31, 26, 0.94);
+
+  /* Typography */
+  --color-text-primary: #e8f0ea;
+  --color-text-secondary: #a3b2a8;
+  --color-text-muted: #75847a;
+
+  /* Borders */
+  --color-border: #2d3b32;
+  --color-border-subtle: #243128;
+  --color-border-hover: #3d4f43;
+
+  /* Semantic Colors */
+  --color-success: #48c78e;
+  --color-success-bg: rgba(72, 199, 142, 0.15);
+  --color-warning: #f2b84b;
+  --color-warning-bg: rgba(242, 184, 75, 0.15);
+  --color-danger: #f07878;
+  --color-danger-bg: rgba(240, 120, 120, 0.15);
+  --color-info: #6aa8ed;
+  --color-info-bg: rgba(106, 168, 237, 0.15);
+
+  /* Shadows for Dark Mode */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-hover: 0 4px 14px -2px rgba(0, 0, 0, 0.45), 0 2px 6px -1px rgba(0, 0, 0, 0.25);
+  --shadow-popover: 0 14px 34px -4px rgba(0, 0, 0, 0.7), 0 4px 14px -2px rgba(0, 0, 0, 0.4);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -81,6 +129,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.18s ease, color 0.18s ease;
 }
 
 button,
@@ -111,6 +160,7 @@ a {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
+  transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .panel-heading {
@@ -174,7 +224,7 @@ a {
 .button.primary,
 .btn.primary {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-primary-text);
 }
 
 .button.primary:hover:not(:disabled),
@@ -185,9 +235,9 @@ a {
 
 .button.secondary,
 .btn.secondary {
-  background: #ffffff;
+  background: var(--color-bg-card);
   border-color: var(--color-border);
-  color: #4b5850;
+  color: var(--color-text-primary);
 }
 
 .button.secondary:hover:not(:disabled),
@@ -249,14 +299,16 @@ textarea {
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  background: #ffffff;
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   color: var(--color-text-primary);
   font-size: 13px;
   transition:
+    background-color 0.15s ease,
     border-color 0.15s ease,
-    box-shadow 0.15s ease;
+    box-shadow 0.15s ease,
+    color 0.15s ease;
 }
 
 textarea {
@@ -272,7 +324,7 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--color-primary-fresh);
-  box-shadow: 0 0 0 3px rgba(47, 157, 101, 0.14);
+  box-shadow: 0 0 0 3px rgba(47, 157, 101, 0.18);
 }
 
 input::placeholder,
@@ -307,7 +359,7 @@ textarea::placeholder {
 .field-label {
   font-size: 12.5px;
   font-weight: 600;
-  color: #4b5850;
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -342,7 +394,7 @@ textarea::placeholder {
   flex-direction: column;
   gap: 4px;
   padding: 14px;
-  background: #ffffff;
+  background: var(--color-bg-card);
 }
 
 .detail-label {
@@ -374,7 +426,7 @@ textarea::placeholder {
 
 .admin-table th {
   padding: 10px 16px;
-  background: #f8faf8;
+  background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
   font-size: 11px;
   font-weight: 650;
@@ -386,7 +438,7 @@ textarea::placeholder {
   padding: 11px 16px;
   border-bottom: 1px solid var(--color-border-subtle);
   font-size: 13px;
-  color: #4b5850;
+  color: var(--color-text-secondary);
 }
 
 .admin-table tbody tr {
@@ -394,7 +446,7 @@ textarea::placeholder {
 }
 
 .admin-table tbody tr:hover {
-  background: #f9fbf9;
+  background: var(--color-bg-secondary);
 }
 
 .table-user-cell {
@@ -452,20 +504,41 @@ textarea::placeholder {
 
 .alert.error {
   background: var(--color-danger-bg);
-  color: #a82e2e;
-  border-color: #f7d2d2;
+  color: var(--color-danger);
+  border-color: rgba(220, 76, 76, 0.25);
 }
 
 .alert.success {
   background: var(--color-success-bg);
-  color: #12633a;
-  border-color: #cdecd9;
+  color: var(--color-success);
+  border-color: rgba(22, 163, 106, 0.25);
 }
 
 .alert.info {
   background: var(--color-info-bg);
-  color: #1f649b;
-  border-color: #cfe1f5;
+  color: var(--color-info);
+  border-color: rgba(57, 133, 214, 0.25);
+}
+
+/* Theme Selector Dropdown */
+.theme-dropdown {
+  width: 140px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-item.active {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.menu-check {
+  margin-left: auto;
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 /* Toast Message */
@@ -478,8 +551,9 @@ textarea::placeholder {
   align-items: center;
   gap: 10px;
   padding: 12px 18px;
-  background: #202a24;
-  color: #ffffff;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 500;
@@ -495,14 +569,14 @@ textarea::placeholder {
   height: 18px;
   border-radius: 50%;
   background: var(--color-primary-fresh);
-  color: #ffffff;
+  color: var(--color-primary-text);
   font-size: 11px;
 }
 
 .toast-message button {
   background: none;
   border: none;
-  color: #9aa59d;
+  color: var(--color-text-muted);
   font-size: 16px;
   cursor: pointer;
   padding: 0 2px;
@@ -510,7 +584,7 @@ textarea::placeholder {
 }
 
 .toast-message button:hover {
-  color: #ffffff;
+  color: var(--color-text-primary);
 }
 
 @keyframes slideToast {

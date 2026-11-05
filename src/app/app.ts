@@ -28,6 +28,7 @@ import { DashboardPageComponent } from './features/dashboard/dashboard';
 import { AnalyticsPageComponent } from './features/analytics/analytics';
 import { AppIconComponent } from './shared/components/app-icon/app-icon';
 import { PaginationComponent } from './shared/components/pagination/pagination';
+import { ThemeService, ThemeMode } from './services/theme_service';
 
 @Component({
   selector: 'app-root',
@@ -269,6 +270,7 @@ for (const module of modules) {
 })
 export class AdminPage implements OnInit, OnDestroy {
   readonly api = inject(AdminApi);
+  readonly themeService = inject(ThemeService);
   private router = inject(Router);
   private subscription?: Subscription;
   private analyticsApi = inject(AnalyticsService);
@@ -305,6 +307,7 @@ export class AdminPage implements OnInit, OnDestroy {
   searchTerm = '';
   catalogView: 'grid' | 'table' = 'grid';
   availabilityFilter = 'all';
+  themeMenu = signal(false);
   profileMenu = signal(false);
   notificationMenu = signal(false);
   headerNotifications = signal<any[]>([]);
@@ -1180,6 +1183,7 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   closeOverlays(): void {
+    this.themeMenu.set(false);
     this.profileMenu.set(false);
     this.notificationMenu.set(false);
     this.searchOpen.set(false);
@@ -1192,9 +1196,21 @@ export class AdminPage implements OnInit, OnDestroy {
     }
   }
 
+  toggleThemeMenu(): void {
+    const opening = !this.themeMenu();
+    this.closeOverlays();
+    this.themeMenu.set(opening);
+  }
+
+  toggleProfileMenu(): void {
+    const opening = !this.profileMenu();
+    this.closeOverlays();
+    this.profileMenu.set(opening);
+  }
+
   async toggleNotifications(): Promise<void> {
-    this.profileMenu.set(false);
     const opening = !this.notificationMenu();
+    this.closeOverlays();
     this.notificationMenu.set(opening);
     if (opening && !this.headerNotifications().length) {
       try {

@@ -42,15 +42,15 @@ import { Component, Input } from '@angular/core';
       }
       .avatar-image {
         object-fit: cover;
-        border: 1px solid #e7ece8;
+        border: 1px solid var(--color-border);
       }
       .avatar-fallback {
-        background: #e8f3ec;
-        color: #176b45;
+        background: var(--color-primary-light);
+        color: var(--color-primary);
         font-weight: 600;
         letter-spacing: 0.02em;
         user-select: none;
-        border: 1px solid #d4e7da;
+        border: 1px solid var(--color-border);
       }
     `,
   ],

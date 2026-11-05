@@ -31,15 +31,15 @@ import { Component, Input } from '@angular/core';
         justify-content: center;
         gap: 12px;
         min-height: 220px;
-        color: #748078;
+        color: var(--color-primary);
         font-size: 13px;
-        font-weight: 500;
+        font-weight: 550;
       }
       .spinner-ring {
         width: 28px;
         height: 28px;
         animation: spin 0.75s linear infinite;
-        color: #176b45;
+        color: var(--color-primary);
       }
       .spinner-track {
         opacity: 0.15;
@@ -48,7 +48,7 @@ import { Component, Input } from '@angular/core';
         opacity: 0.9;
       }
       .spinner-label {
-        color: #748078;
+        color: var(--color-text-secondary);
         font-size: 13px;
       }
       @keyframes spin {

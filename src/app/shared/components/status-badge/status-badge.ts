@@ -26,8 +26,8 @@ import { Component, Input } from '@angular/core';
         letter-spacing: 0.01em;
         line-height: 1.3;
         white-space: nowrap;
-        background: #f0f4f1;
-        color: #556259;
+        background: var(--color-bg-secondary);
+        color: var(--color-text-secondary);
         border: 1px solid transparent;
       }
       .badge-dot {
@@ -38,29 +38,29 @@ import { Component, Input } from '@angular/core';
         flex-shrink: 0;
       }
       .badge.good {
-        background: #e8f5ec;
-        color: #147146;
-        border-color: #d1ebd8;
+        background: var(--color-success-bg);
+        color: var(--color-success);
+        border-color: rgba(72, 199, 142, 0.2);
       }
       .badge.wait {
-        background: #fef5e7;
-        color: #a46408;
-        border-color: #fae4c2;
+        background: var(--color-warning-bg);
+        color: var(--color-warning);
+        border-color: rgba(242, 184, 75, 0.2);
       }
       .badge.bad {
-        background: #fdf0f0;
-        color: #be3939;
-        border-color: #f7d2d2;
+        background: var(--color-danger-bg);
+        color: var(--color-danger);
+        border-color: rgba(240, 120, 120, 0.2);
       }
       .badge.info {
-        background: #edf5fc;
-        color: #276ea9;
-        border-color: #d4e7f8;
+        background: var(--color-info-bg);
+        color: var(--color-info);
+        border-color: rgba(106, 168, 237, 0.2);
       }
       .badge.neutral {
-        background: #f1f4f2;
-        color: #5f6e63;
-        border-color: #e2e8e4;
+        background: var(--color-bg-secondary);
+        color: var(--color-text-secondary);
+        border-color: var(--color-border);
       }
     `,
   ],

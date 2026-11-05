@@ -154,6 +154,64 @@
 
       <!-- Topbar Actions -->
       <div class="topbar-right">
+        <!-- Theme Mode Switcher -->
+        <div class="dropdown-anchor theme-dropdown-anchor">
+          <button
+            type="button"
+            class="icon-button theme-toggle-btn"
+            aria-label="Appearance theme selector"
+            [attr.aria-expanded]="themeMenu()"
+            (click)="toggleThemeMenu()"
+            title="Appearance: {{ themeService.mode() | titlecase }}"
+          >
+            <app-icon [name]="themeService.isDark() ? 'moon' : 'sun'" [size]="18" />
+          </button>
+
+          @if (themeMenu()) {
+            <div class="account-dropdown theme-dropdown" role="menu" aria-label="Select color theme">
+              <button
+                type="button"
+                role="menuitem"
+                class="dropdown-item"
+                [class.active]="themeService.mode() === 'light'"
+                (click)="themeService.setTheme('light'); closeOverlays()"
+              >
+                <app-icon name="sun" [size]="15" />
+                <span>Light</span>
+                @if (themeService.mode() === 'light') {
+                  <app-icon name="check" [size]="14" class="menu-check" />
+                }
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                class="dropdown-item"
+                [class.active]="themeService.mode() === 'dark'"
+                (click)="themeService.setTheme('dark'); closeOverlays()"
+              >
+                <app-icon name="moon" [size]="15" />
+                <span>Dark</span>
+                @if (themeService.mode() === 'dark') {
+                  <app-icon name="check" [size]="14" class="menu-check" />
+                }
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                class="dropdown-item"
+                [class.active]="themeService.mode() === 'system'"
+                (click)="themeService.setTheme('system'); closeOverlays()"
+              >
+                <app-icon name="system" [size]="15" />
+                <span>System</span>
+                @if (themeService.mode() === 'system') {
+                  <app-icon name="check" [size]="14" class="menu-check" />
+                }
+              </button>
+            </div>
+          }
+        </div>
+
         <!-- Notifications Menu -->
         <div class="dropdown-anchor">
           <button
@@ -202,7 +260,7 @@
             class="profile-trigger"
             aria-label="Administrator profile menu"
             [attr.aria-expanded]="profileMenu()"
-            (click)="profileMenu.set(!profileMenu())"
+            (click)="toggleProfileMenu()"
           >
             <app-user-avatar [name]="displayName()" [image]="api.user()?.avatar" [size]="32" />
             <span class="profile-meta">
