@@ -1,3 +1,186 @@
-.catalog-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:18px}.catalog-card{overflow:hidden;border:1px solid #e8ece5;border-radius:12px;background:#fff;box-shadow:0 3px 12px #344a3508}.catalog-image{display:block;width:100%;height:160px;object-fit:cover;background:#f0f5ee}.catalog-placeholder{display:grid;place-items:center;color:#8aa587;font-size:38px}.catalog-card-body{padding:14px}.catalog-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.catalog-card-heading h2{margin:0;color:#33483a;font-size:14px}.catalog-card-heading p{margin:5px 0 0;color:#929c92;font-size:10px;line-height:1.5}.catalog-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0;color:#788579;font-size:10px}.catalog-meta b{color:#3e704a}.catalog-meta small{margin-left:auto}.catalog-actions{display:flex;gap:14px;padding-top:11px;border-top:1px solid #eff1ed}.catalog-actions button{padding:0;border:0;background:none;color:#4e805c;font-size:10px;font-weight:750;cursor:pointer}.catalog-actions .danger-text{color:#bf5b4e}
-@media(max-width:1000px){.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:600px){.catalog-grid{grid-template-columns:1fr;padding:12px}.catalog-image{height:190px}}
+:host {
+  display: block;
+  width: 100%;
+}
+
+.catalog-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.grid-card {
+  background: #ffffff;
+  border: 1px solid #e7ece8;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(32, 42, 36, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.15s ease;
+}
+
+.grid-card:hover {
+  border-color: #2f9d65;
+  box-shadow: 0 6px 16px rgba(23, 107, 69, 0.08);
+  transform: translateY(-2px);
+}
+
+.card-media {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #f7f9f7;
+  overflow: hidden;
+}
+
+.card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.grid-card:hover .card-img {
+  transform: scale(1.03);
+}
+
+.card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4f1;
+  color: #748078;
+}
+
+.card-badge-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.card-content {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+
+.card-headings {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  color: #202a24;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-sub {
+  margin: 0;
+  font-size: 12px;
+  color: #748078;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: #f7f9f7;
+  border-radius: 8px;
+  border: 1px solid #edf1ee;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.farmer-name {
+  font-size: 11.5px;
+  color: #556259;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.price-tag {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #176b45;
+  white-space: nowrap;
+}
+
+.qty-tag {
+  font-size: 11px;
+  color: #748078;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.btn-sm {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 550;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  border: 1px solid #e7ece8;
+  color: #556259;
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-secondary:hover {
+  background: #f7f9f7;
+  border-color: #cbd5ce;
+  color: #202a24;
+}
+
+.btn-danger-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #dc4c4c;
+  padding: 6px 8px;
+}
+
+.btn-danger-ghost:hover {
+  background: #fdf0f0;
+  border-color: #f7d2d2;
+}
+
+@media (max-width: 480px) {
+  .catalog-cards-grid {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+}

@@ -26,223 +26,1198 @@ import { CatalogGridComponent } from './features/catalog/catalog-grid';
 import { CatalogOverviewComponent } from './features/catalog/catalog-overview';
 import { DashboardPageComponent } from './features/dashboard/dashboard';
 import { AnalyticsPageComponent } from './features/analytics/analytics';
+import { AppIconComponent } from './shared/components/app-icon/app-icon';
+import { PaginationComponent } from './shared/components/pagination/pagination';
 
-@Component({ selector: 'app-root', imports: [RouterOutlet], template: '<router-outlet />' })
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
+  template: '<router-outlet />',
+})
 export class App {}
 
-type Field = { key: string; label: string; type?: string; choices?: string[]; required?: boolean; multiline?: boolean; lookup?:string; role?:string };
-type Module = { key: string; title: string; icon: string; fields: Field[]; create?: boolean; delete?: boolean };
+type Field = {
+  key: string;
+  label: string;
+  type?: string;
+  choices?: string[];
+  required?: boolean;
+  multiline?: boolean;
+  lookup?: string;
+  role?: string;
+};
 
-type NavigationGroup={title:string;keys:string[]};
-const navigationGroups:NavigationGroup[]=[
-  {title:'Management',keys:['users','farmer-profiles','business-buyer-profiles']},
-  {title:'Marketplace',keys:['products','categories','harvest-batches','orders','catalog']},
-  {title:'Agriculture',keys:['market-prices','advisories','crop-reports']},
-  {title:'Communication',keys:['notifications']},
+type Module = {
+  key: string;
+  title: string;
+  iconName: string;
+  fields: Field[];
+  create?: boolean;
+  delete?: boolean;
+};
+
+type NavigationGroup = { title: string; keys: string[] };
+
+const navigationGroups: NavigationGroup[] = [
+  { title: 'Management', keys: ['users', 'farmer-profiles', 'business-buyer-profiles'] },
+  { title: 'Marketplace', keys: ['products', 'categories', 'harvest-batches', 'orders', 'catalog'] },
+  { title: 'Agriculture', keys: ['market-prices', 'advisories', 'crop-reports'] },
+  { title: 'Communication', keys: ['notifications'] },
 ];
 
 const modules: Module[] = [
-  { key:'users', title:'Users', icon:'♙', fields:[{key:'first_name',label:'First name',required:true},{key:'middle_name',label:'Middle name',required:true},{key:'last_name',label:'Last name',required:true},{key:'email',label:'Email',type:'email',required:true},{key:'phone',label:'Phone',required:true},{key:'password',label:'Password',type:'password'},{key:'role',label:'Role',choices:['admin','farmer','buyer','business_buyer'],required:true},{key:'status',label:'Status',choices:['active','suspended','pending'],required:true}] },
-  { key:'categories', title:'Categories', icon:'◈', fields:[{key:'name',label:'Name',required:true},{key:'description',label:'Description',multiline:true},{key:'image',label:'Image',type:'image'}] },
-  { key:'products', title:'Products', icon:'▣', fields:[{key:'farmer_id',label:'Farmer',lookup:'users',role:'farmer'},{key:'category_id',label:'Category',lookup:'categories',required:true},{key:'name',label:'Name',required:true},{key:'description',label:'Description',multiline:true},{key:'variety',label:'Variety'},{key:'unit',label:'Unit',required:true},{key:'price_per_unit',label:'Price per unit',type:'number',required:true},{key:'available_quantity',label:'Available quantity',type:'number',required:true},{key:'minimum_order_quantity',label:'Minimum order quantity',type:'number',required:true},{key:'quality_grade',label:'Quality grade'},{key:'status',label:'Status',choices:['draft','active','sold_out','archived'],required:true}] },
-  { key:'harvest-batches', title:'Harvest batches', icon:'♧', fields:[{key:'farmer_id',label:'Farmer',lookup:'users',role:'farmer'},{key:'product_id',label:'Product',lookup:'products',required:true},{key:'harvest_date',label:'Harvest date',type:'datetime-local',required:true},{key:'available_date',label:'Available date',type:'datetime-local',required:true},{key:'quantity',label:'Quantity',type:'number',required:true},{key:'remaining_quantity',label:'Remaining quantity',type:'number',required:true},{key:'expected_expiration_date',label:'Expected expiration',type:'datetime-local',required:true},{key:'harvest_location',label:'Harvest location',required:true},{key:'status',label:'Status',choices:['upcoming','available','reserved','completed','expired'],required:true}] },
-  { key:'farmer-profiles', title:'Farmer profiles', icon:'♧', fields:[{key:'user_id',label:'Farmer account',lookup:'users',role:'farmer'},{key:'farm_name',label:'Farm name',required:true},{key:'farm_address',label:'Farm address',required:true},{key:'municipality',label:'Municipality',required:true},{key:'province',label:'Province',required:true},{key:'farm_size',label:'Farm size',type:'number',required:true},{key:'farming_type',label:'Farming type',choices:['organic','conventional','mixed'],required:true},{key:'verification_status',label:'Verification',choices:['pending','approved','rejected'],required:true},{key:'latitude',label:'Latitude',type:'number'},{key:'longitude',label:'Longitude',type:'number'}] },
-  { key:'business-buyer-profiles', title:'Business profiles', icon:'⌂', fields:[{key:'user_id',label:'Business buyer account',lookup:'users',role:'business_buyer'},{key:'business_name',label:'Business name',required:true},{key:'business_type',label:'Business type',choices:['restaurant','retailer','distributor'],required:true},{key:'business_address',label:'Business address',required:true},{key:'business_registration_number',label:'Registration number',required:true},{key:'contact_person',label:'Contact person',required:true},{key:'province',label:'Province',required:true},{key:'verification_status',label:'Verification',choices:['pending','approved','rejected'],required:true}] },
-  { key:'market-prices', title:'Market prices', icon:'↗', fields:[{key:'product_id',label:'Product',lookup:'products',required:true},{key:'market_name',label:'Market name',required:true},{key:'municipality',label:'Municipality',required:true},{key:'price_min',label:'Minimum price',type:'number',required:true},{key:'price_max',label:'Maximum price',type:'number',required:true},{key:'average_price',label:'Average price',type:'number',required:true},{key:'unit',label:'Unit',required:true},{key:'recorded_date',label:'Recorded date',type:'datetime-local',required:true}] },
-  { key:'advisories', title:'Advisories', icon:'✳', fields:[{key:'title',label:'Title',required:true},{key:'content',label:'Content',multiline:true,required:true},{key:'category',label:'Category',choices:['crop','livestock','pest_control','weather','pest','disease','planting','government_assistance'],required:true},{key:'municipality',label:'Municipality',required:true},{key:'severity',label:'Severity',choices:['low','medium','high'],required:true},{key:'published_at',label:'Published at',type:'datetime-local',required:true},{key:'expired_at',label:'Expires at',type:'datetime-local'},{key:'status',label:'Status',choices:['draft','published','archived'],required:true}] },
-  { key:'crop-reports', title:'Crop reports', icon:'⚑', fields:[{key:'farmer_id',label:'Farmer',lookup:'users',role:'farmer',required:true},{key:'product_id',label:'Product',lookup:'products',required:true},{key:'report_type',label:'Report type',choices:['disease','pest','crop_damage','flooding'],required:true},{key:'description',label:'Description',multiline:true,required:true},{key:'image',label:'Image',type:'image'},{key:'latitude',label:'Latitude',type:'number'},{key:'longitude',label:'Longitude',type:'number'},{key:'severity',label:'Severity',choices:['low','medium','high','critical'],required:true},{key:'status',label:'Status',choices:['submitted','reviewing','resolved'],required:true}] },
-  { key:'notifications', title:'Notifications', icon:'♧', fields:[{key:'user_id',label:'Recipient',lookup:'users',required:true},{key:'title',label:'Title',required:true},{key:'message',label:'Message',multiline:true,required:true},{key:'is_read',label:'Read status',choices:['unread','read'],required:true}] },
-  { key:'catalog', title:'Catalog overview', icon:'▧', create:false, delete:false, fields:[] },
-  { key:'orders', title:'Orders', icon:'▤', create:false, delete:false, fields:[{key:'status',label:'Status',choices:['pending','confirmed','processing','shipped','delivered','cancelled']},{key:'payment_status',label:'Payment status',choices:['unpaid','paid','refund']},{key:'fulfillment_status',label:'Fulfillment',choices:['pickup','farmer_arranged']},{key:'delivery_address',label:'Delivery address',multiline:true},{key:'notes',label:'Notes',multiline:true}] },
+  {
+    key: 'users',
+    title: 'Users',
+    iconName: 'users',
+    fields: [
+      { key: 'first_name', label: 'First name', required: true },
+      { key: 'middle_name', label: 'Middle name' },
+      { key: 'last_name', label: 'Last name', required: true },
+      { key: 'email', label: 'Email', type: 'email', required: true },
+      { key: 'phone', label: 'Phone', required: true },
+      { key: 'password', label: 'Password', type: 'password' },
+      { key: 'role', label: 'Role', choices: ['admin', 'farmer', 'buyer', 'business_buyer'], required: true },
+      { key: 'status', label: 'Status', choices: ['active', 'suspended', 'pending'], required: true },
+    ],
+  },
+  {
+    key: 'categories',
+    title: 'Categories',
+    iconName: 'categories',
+    fields: [
+      { key: 'name', label: 'Name', required: true },
+      { key: 'description', label: 'Description', multiline: true },
+      { key: 'image', label: 'Image', type: 'image' },
+    ],
+  },
+  {
+    key: 'products',
+    title: 'Products',
+    iconName: 'products',
+    fields: [
+      { key: 'farmer_id', label: 'Farmer', lookup: 'users', role: 'farmer' },
+      { key: 'category_id', label: 'Category', lookup: 'categories', required: true },
+      { key: 'name', label: 'Name', required: true },
+      { key: 'description', label: 'Description', multiline: true },
+      { key: 'variety', label: 'Variety' },
+      { key: 'unit', label: 'Unit', required: true },
+      { key: 'price_per_unit', label: 'Price per unit', type: 'number', required: true },
+      { key: 'available_quantity', label: 'Available quantity', type: 'number', required: true },
+      { key: 'minimum_order_quantity', label: 'Minimum order quantity', type: 'number', required: true },
+      { key: 'quality_grade', label: 'Quality grade' },
+      { key: 'status', label: 'Status', choices: ['draft', 'active', 'sold_out', 'archived'], required: true },
+    ],
+  },
+  {
+    key: 'harvest-batches',
+    title: 'Harvest batches',
+    iconName: 'harvest-batches',
+    fields: [
+      { key: 'farmer_id', label: 'Farmer', lookup: 'users', role: 'farmer' },
+      { key: 'product_id', label: 'Product', lookup: 'products', required: true },
+      { key: 'harvest_date', label: 'Harvest date', type: 'datetime-local', required: true },
+      { key: 'available_date', label: 'Available date', type: 'datetime-local', required: true },
+      { key: 'quantity', label: 'Quantity', type: 'number', required: true },
+      { key: 'remaining_quantity', label: 'Remaining quantity', type: 'number', required: true },
+      { key: 'expected_expiration_date', label: 'Expected expiration', type: 'datetime-local', required: true },
+      { key: 'harvest_location', label: 'Harvest location', required: true },
+      { key: 'status', label: 'Status', choices: ['upcoming', 'available', 'reserved', 'completed', 'expired'], required: true },
+    ],
+  },
+  {
+    key: 'farmer-profiles',
+    title: 'Farmer profiles',
+    iconName: 'farmer-profiles',
+    fields: [
+      { key: 'user_id', label: 'Farmer account', lookup: 'users', role: 'farmer' },
+      { key: 'farm_name', label: 'Farm name', required: true },
+      { key: 'farm_address', label: 'Farm address', required: true },
+      { key: 'municipality', label: 'Municipality', required: true },
+      { key: 'province', label: 'Province', required: true },
+      { key: 'farm_size', label: 'Farm size (ha)', type: 'number', required: true },
+      { key: 'farming_type', label: 'Farming type', choices: ['organic', 'conventional', 'mixed'], required: true },
+      { key: 'verification_status', label: 'Verification', choices: ['pending', 'approved', 'rejected'], required: true },
+      { key: 'latitude', label: 'Latitude', type: 'number' },
+      { key: 'longitude', label: 'Longitude', type: 'number' },
+    ],
+  },
+  {
+    key: 'business-buyer-profiles',
+    title: 'Business profiles',
+    iconName: 'business-buyer-profiles',
+    fields: [
+      { key: 'user_id', label: 'Business buyer account', lookup: 'users', role: 'business_buyer' },
+      { key: 'business_name', label: 'Business name', required: true },
+      { key: 'business_type', label: 'Business type', choices: ['restaurant', 'retailer', 'distributor'], required: true },
+      { key: 'business_address', label: 'Business address', required: true },
+      { key: 'business_registration_number', label: 'Registration number', required: true },
+      { key: 'contact_person', label: 'Contact person', required: true },
+      { key: 'province', label: 'Province', required: true },
+      { key: 'verification_status', label: 'Verification', choices: ['pending', 'approved', 'rejected'], required: true },
+    ],
+  },
+  {
+    key: 'market-prices',
+    title: 'Market prices',
+    iconName: 'market-prices',
+    fields: [
+      { key: 'product_id', label: 'Product', lookup: 'products', required: true },
+      { key: 'market_name', label: 'Market name', required: true },
+      { key: 'municipality', label: 'Municipality', required: true },
+      { key: 'price_min', label: 'Minimum price', type: 'number', required: true },
+      { key: 'price_max', label: 'Maximum price', type: 'number', required: true },
+      { key: 'average_price', label: 'Average price', type: 'number', required: true },
+      { key: 'unit', label: 'Unit', required: true },
+      { key: 'recorded_date', label: 'Recorded date', type: 'datetime-local', required: true },
+    ],
+  },
+  {
+    key: 'advisories',
+    title: 'Advisories',
+    iconName: 'advisories',
+    fields: [
+      { key: 'title', label: 'Title', required: true },
+      { key: 'content', label: 'Content', multiline: true, required: true },
+      {
+        key: 'category',
+        label: 'Category',
+        choices: ['crop', 'livestock', 'pest_control', 'weather', 'pest', 'disease', 'planting', 'government_assistance'],
+        required: true,
+      },
+      { key: 'municipality', label: 'Municipality', required: true },
+      { key: 'severity', label: 'Severity', choices: ['low', 'medium', 'high'], required: true },
+      { key: 'published_at', label: 'Published at', type: 'datetime-local', required: true },
+      { key: 'expired_at', label: 'Expires at', type: 'datetime-local' },
+      { key: 'status', label: 'Status', choices: ['draft', 'published', 'archived'], required: true },
+    ],
+  },
+  {
+    key: 'crop-reports',
+    title: 'Crop reports',
+    iconName: 'crop-reports',
+    fields: [
+      { key: 'farmer_id', label: 'Farmer', lookup: 'users', role: 'farmer', required: true },
+      { key: 'product_id', label: 'Product', lookup: 'products', required: true },
+      { key: 'report_type', label: 'Report type', choices: ['disease', 'pest', 'crop_damage', 'flooding'], required: true },
+      { key: 'description', label: 'Description', multiline: true, required: true },
+      { key: 'image', label: 'Image', type: 'image' },
+      { key: 'latitude', label: 'Latitude', type: 'number' },
+      { key: 'longitude', label: 'Longitude', type: 'number' },
+      { key: 'severity', label: 'Severity', choices: ['low', 'medium', 'high', 'critical'], required: true },
+      { key: 'status', label: 'Status', choices: ['submitted', 'reviewing', 'resolved'], required: true },
+    ],
+  },
+  {
+    key: 'notifications',
+    title: 'Notifications',
+    iconName: 'notifications',
+    fields: [
+      { key: 'user_id', label: 'Recipient', lookup: 'users', required: true },
+      { key: 'title', label: 'Title', required: true },
+      { key: 'message', label: 'Message', multiline: true, required: true },
+      { key: 'is_read', label: 'Read status', choices: ['unread', 'read'], required: true },
+    ],
+  },
+  { key: 'catalog', title: 'Catalog overview', iconName: 'catalog', create: false, delete: false, fields: [] },
+  {
+    key: 'orders',
+    title: 'Orders',
+    iconName: 'orders',
+    create: false,
+    delete: false,
+    fields: [
+      { key: 'status', label: 'Status', choices: ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] },
+      { key: 'payment_status', label: 'Payment status', choices: ['unpaid', 'paid', 'refund'] },
+      { key: 'fulfillment_status', label: 'Fulfillment', choices: ['pickup', 'farmer_arranged'] },
+      { key: 'delivery_address', label: 'Delivery address', multiline: true },
+      { key: 'notes', label: 'Notes', multiline: true },
+    ],
+  },
 ];
-for (const module of modules) { module.create ??= true; module.delete ??= true; }
+
+for (const module of modules) {
+  module.create ??= true;
+  module.delete ??= true;
+}
 
 @Component({
-  standalone: true, imports:[CommonModule, FormsModule, RouterLink,StatCardComponent,StatusBadgeComponent,LoadingSpinnerComponent,EmptyStateComponent,ImageUploadComponent,UserAvatarComponent,ConfirmDialogComponent,CatalogGridComponent,CatalogOverviewComponent,DashboardPageComponent,AnalyticsPageComponent], selector:'admin-page', styleUrl:'./app.css', encapsulation:ViewEncapsulation.None,
-  template:`
-  <div class="admin-layout" (click)="onWorkspaceClick($event)">
-    @if(mobileMenu()){<button class="sidebar-backdrop" aria-label="Close navigation" (click)="mobileMenu.set(false)"></button>}
-    <aside class="sidebar" [class.open]="mobileMenu()" [class.collapsed]="sidebarCollapsed()"><a class="brand" routerLink="/admin" (click)="mobileMenu.set(false)"><span class="brand-mark">🌱</span><span class="brand-copy">Farmer<span class="brand-light">Link</span><small>ADMIN CONSOLE</small></span></a>
-      <div class="nav-label">OVERVIEW</div><a class="nav-item" routerLink="/admin" [class.active]="section()==='dashboard'" [attr.aria-current]="section()==='dashboard'?'page':null" (click)="mobileMenu.set(false)"><span>▦</span><span class="nav-text">Dashboard</span></a><a class="nav-item" routerLink="/admin/analytics" [class.active]="section()==='analytics'" [attr.aria-current]="section()==='analytics'?'page':null" (click)="mobileMenu.set(false)"><span>◷</span><span class="nav-text">Analytics</span></a>
-      @for(group of navigationGroups;track group.title){<div class="nav-label">{{group.title}}</div>@for(item of navigationItems(group);track item.key){<a class="nav-item" [routerLink]="'/admin/'+item.key" [class.active]="section()===item.key" [attr.aria-current]="section()===item.key?'page':null" (click)="mobileMenu.set(false)"><span>{{item.icon}}</span><span class="nav-text">{{item.title}}</span></a>}}
-      <div class="sidebar-bottom"><div class="nav-label">SYSTEM</div><a class="nav-item" routerLink="/admin/settings" [class.active]="section()==='settings'" (click)="mobileMenu.set(false)"><span>⚙</span><span class="nav-text">Settings</span></a><button class="nav-item signout" (click)="signOut()"><span>↪</span><span class="nav-text">Sign out</span></button><div class="user-chip"><app-user-avatar [name]="displayName()" [image]="api.user()?.avatar" [size]="34"/><div class="user-name"><b>{{displayName()}}</b><small>Administrator</small></div><span class="online"></span></div></div>
-    </aside>
-    <main class="main-area" [class.wide]="sidebarCollapsed()"><header class="topbar"><button class="menu-toggle" aria-label="Open navigation" [attr.aria-expanded]="mobileMenu()" (click)="toggleSidebar()">☰</button><button class="collapse-toggle" [attr.aria-label]="sidebarCollapsed()?'Expand sidebar':'Collapse sidebar'" [attr.aria-expanded]="!sidebarCollapsed()" (click)="sidebarCollapsed.set(!sidebarCollapsed())">{{sidebarCollapsed()?'»':'«'}}</button><div class="breadcrumbs"><span>FarmerLink</span><span aria-hidden="true"> / </span><b>{{pageTitle()}}</b></div><div class="top-search"><span aria-hidden="true">⌕</span><input aria-label="Search admin pages" placeholder="Search pages and tools" [(ngModel)]="searchTerm" (ngModelChange)="searchOpen.set(true)" (focus)="searchOpen.set(true)">@if(searchOpen()&&searchTerm){<div class="search-results">@for(item of searchResults();track item.key){<a [routerLink]="item.key==='dashboard'?'/admin':'/admin/'+item.key" (click)="closeOverlays()"><span>{{item.icon}}</span>{{item.title}}</a>}@if(!searchResults().length){<p>No matching management pages.</p>}</div>}</div><div class="top-actions"><div class="dropdown-anchor"><button class="icon-button notification-button" aria-label="Notifications" (click)="toggleNotifications()">♧@if(unreadNotifications()){<i class="unread-dot"></i>}</button>@if(notificationMenu()){<div class="account-dropdown notification-dropdown"><div class="dropdown-heading"><b>Notifications</b><a routerLink="/admin/notifications" (click)="closeOverlays()">View all</a></div>@for(item of headerNotifications();track item.id){<a class="dropdown-notification" routerLink="/admin/notifications" (click)="closeOverlays()"><span class="notification-mark">{{item.is_read==='unread'?'•':'✓'}}</span><span><b>{{item.title}}</b><small>{{item.message}}</small></span></a>}@if(!headerNotifications().length){<p class="dropdown-empty">No notifications available.</p>}</div>}</div><div class="dropdown-anchor"><button class="profile-trigger" aria-label="Administrator menu" [attr.aria-expanded]="profileMenu()" (click)="profileMenu.set(!profileMenu())"><app-user-avatar [name]="displayName()" [image]="api.user()?.avatar" [size]="32"/><span class="profile-label"><b>{{displayName()}}</b><small>Admin</small></span><span>⌄</span></button>@if(profileMenu()){<div class="account-dropdown profile-dropdown"><a routerLink="/admin/profile" (click)="closeOverlays()">♙ &nbsp; My profile</a><a routerLink="/admin/settings" (click)="closeOverlays()">⚙ &nbsp; Settings</a><button (click)="signOut()">↪ &nbsp; Sign out</button></div>}</div></div></header>
-      <div class="page-content">
-        @if (loading()) { <app-loading-spinner [label]="'Loading '+pageTitle().toLowerCase()+'…'"/> }
-        @if (pageError()) { <div class="alert error page-alert"><b>We couldn’t load this page</b><span>{{pageError()}}</span><button class="button secondary" (click)="loadPage()">Try again</button></div> }
-        @if(!loading()&&!pageError()&&section()==='dashboard'){<app-dashboard-page [metrics]="metrics()" [analytics]="analytics()" [orders]="orders()" [pendingProfiles]="pendingProfiles()" [reports]="reports()" [recentUsers]="recentUsers()" [firstName]="firstName()" (refresh)="loadPage()"/>}
-        @if(!loading()&&!pageError()&&section()==='analytics'){<app-analytics-page [data]="analytics()" [metrics]="metrics()"/>}
-        @if(!loading()&&!pageError()&&section()==='catalog'){<app-catalog-overview [analytics]="analytics()" [products]="catalogProducts()" [categories]="catalogCategories()" [batches]="catalogBatches()"/>}
-        @if (!loading() && !pageError() && module()&&section()!=='catalog') {<section>
-          <div class="page-heading"><div><span class="eyebrow">MANAGEMENT</span><h1>{{module()!.title}}</h1><p>{{managementDescription()}}</p></div>@if (module()!.create && mode()==='list') {<button class="button primary" (click)="startCreate()">＋ Add {{singular()}}</button>}</div>
-          @if(managementStats().length&&mode()==='list'){<div class="metric-grid management-metrics">@for(stat of managementStats();track stat.label){<app-stat-card [label]="stat.label" [value]="stat.value" [icon]="'◷'" [tone]="'green'"/>}</div>}
-          @if (mode()==='list') {<section class="panel data-panel"><div class="list-toolbar"><label class="search-box"><span>⌕</span><input placeholder="Search {{module()!.title.toLowerCase()}} on this page" [(ngModel)]="query" (ngModelChange)="filterRows()"></label><div class="filters-row">@if(section()==='users'){<select aria-label="Filter users by role" [(ngModel)]="userRoleFilter" (ngModelChange)="filterRows()"><option value="all">All roles</option><option value="admin">Admin</option><option value="farmer">Farmer</option><option value="buyer">Buyer</option><option value="business_buyer">Business buyer</option></select>}@if(statusOptions().length){<select aria-label="Filter by status" [(ngModel)]="recordStatusFilter" (ngModelChange)="filterRows()"><option value="all">All statuses</option>@for(status of statusOptions();track status){<option [value]="status">{{label(status)}}</option>}</select>}@for(field of lookupFields();track field.key){<select [attr.aria-label]="'Filter by '+field.label" [(ngModel)]="lookupFilters[field.key]" (ngModelChange)="filterRows()"><option value="">All {{field.label.toLowerCase()}}s</option>@for(option of lookupOptions(field);track option.id){<option [value]="option.id">{{lookupLabel(field.lookup!,option)}}</option>}</select>}@if(section()==='products'){<select aria-label="Filter product availability" [(ngModel)]="availabilityFilter" (ngModelChange)="filterRows()"><option value="all">All inventory</option><option value="available">Available</option><option value="out">Out of stock</option></select><div class="view-toggle"><button [class.active]="catalogView==='grid'" (click)="catalogView='grid'">Grid</button><button [class.active]="catalogView==='table'" (click)="catalogView='table'">Table</button></div>}@if(section()==='orders'&&paymentStatusOptions().length){<select aria-label="Filter by payment status" [(ngModel)]="paymentStatusFilter" (ngModelChange)="filterRows()"><option value="">All payment statuses</option>@for(status of paymentStatusOptions();track status){<option [value]="status">{{label(status)}}</option>}</select>}<span class="toolbar-meta">{{filteredRows().length}} of {{rows().length}} rows on this page</span><button class="button secondary small" (click)="loadPage()" aria-label="Refresh {{module()!.title}}">↻ Refresh</button></div></div>
-            @if (filteredRows().length) {@if(section()==='categories'||(section()==='products'&&catalogView==='grid')){<app-catalog-grid [kind]="section()==='categories'?'categories':'products'" [records]="filteredRows()" [deletable]="module()!.delete??false" (view)="openDetail($event.id)" (edit)="startEdit($event)" (remove)="remove($event)"/>}@else{<div class="table-wrap"><table><thead><tr>@for (column of columns(); track column) {<th>{{label(column)}}</th>}<th class="actions-col">ACTIONS</th></tr></thead><tbody>@for (row of filteredRows(); track row.id) {<tr>@for (column of columns(); track column) {<td>@if(column==='first_name'){<span class="table-user"><app-user-avatar [name]="row.first_name+' '+row.last_name" [image]="row.avatar" [size]="30"/><span><b>{{row.first_name}} {{row.last_name}}</b><small>{{row.email}}</small></span></span>}@else if(column==='avatar'){<app-user-avatar [name]="row.user_name??row.first_name??'Account'" [image]="row.avatar" [size]="32"/>}@else if(column==='image'&&row.image){<img class="table-image" [src]="row.image" [alt]="row.name??'Record image'">}@else if(['status','verification_status','is_read','severity','payment_status','role'].includes(column)){<app-status-badge [label]="row[column]"/>}@else{<span>{{displayCell(row,column)}}</span>}</td>}<td class="row-actions"><button (click)="openDetail(row.id)" title="View">View</button><button (click)="startEdit(row)" title="Edit">{{section()==='orders'?'Update':'Edit'}}</button>@if (module()!.delete) {<button class="danger-text" (click)="remove(row)" title="Delete">Delete</button>}</td></tr>}</tbody></table></div>}} @else {<app-empty-state [icon]="query||userRoleFilter!=='all'||recordStatusFilter!=='all'?'⌕':'♧'" [title]="query||userRoleFilter!=='all'||recordStatusFilter!=='all'?'No matching records':'Nothing here yet'" [description]="query||userRoleFilter!=='all'||recordStatusFilter!=='all'?'Adjust your search or filters.':'Records will appear here when available.'"/>}
-            <div class="pagination"><span>Showing {{rows().length ? offset+1 : 0}}–{{offset+rows().length}} on this page</span><div><button class="button secondary small" [disabled]="offset===0" (click)="page(-1)">← Previous</button><button class="button secondary small" [disabled]="!hasNext" (click)="page(1)">Next →</button></div></div>
-          </section> }
-          @if (mode()==='detail' && selected()) {<section class="panel record-panel"><div class="panel-heading"><div><span class="eyebrow">RECORD #{{selected().id}}</span><h2>{{module()!.title}} details</h2></div><div class="button-row"><button class="button secondary" (click)="goList()">← Back</button><button class="button primary" (click)="startEdit(selected())">{{section()==='orders'?'Update order':'Edit record'}}</button></div></div>@if(selected().image){<img class="record-image" [src]="selected().image" alt="Record attachment">}@if(selected().avatar){<img class="record-image" [src]="selected().avatar" alt="Profile photo">}<div class="details-grid">@for (entry of detailEntries(); track entry[0]) {<div class="detail-item"><small>{{label(entry[0])}}</small><b>{{formatValue(entry[1])}}</b></div>}</div>@if (section()==='orders') {<div class="order-items"><h3>Order items</h3>@if (orderItems().length) {@for (item of orderItems(); track item.id) {<div class="order-item"><b>Product {{item.product_id}} · Batch {{item.harvest_batch_id}}</b><span>{{item.quantity}} × ₱{{item.unit_price}}</span></div>}} @else {<p>No order items available.</p>}</div>}@if (module()!.delete) {<div class="record-danger"><button class="button danger" (click)="remove(selected())">Delete this record</button></div>}</section> }
-          @if (mode()==='edit' || mode()==='create') {<form class="panel edit-panel" (ngSubmit)="save()"><div class="panel-heading"><div><span class="eyebrow">{{mode()==='create'?'NEW RECORD':'UPDATE RECORD'}}</span><h2>{{mode()==='create'?'Add':'Edit'}} {{singular()}}</h2></div><button type="button" class="button secondary" (click)="goList()">Cancel</button></div>@if(section()==='market-prices'&&mode()==='create'){<div class="info-note"><b>Price verification</b><span>FarmerLink records the signed-in administrator as the verifier when this price record is created.</span></div>}<div class="form-grid">@for (field of editableFields(); track field.key) {<label [class.wide-field]="field.multiline || field.type==='image'">{{field.label}} @if(field.lookup){<select [name]="field.key" [(ngModel)]="form[field.key]" [required]="required(field)"><option [ngValue]="null">Select {{field.label.toLowerCase()}}</option>@for(option of lookupOptions(field);track option.id){<option [ngValue]="option.id">{{lookupLabel(field.lookup,option)}}</option>}</select>} @else if (field.choices) {<select [name]="field.key" [(ngModel)]="form[field.key]" [required]="required(field)"><option value="">Select {{field.label.toLowerCase()}}</option>@for (choice of field.choices; track choice) {<option [value]="choice">{{choice | titlecase}}</option>}</select>} @else if (field.multiline) {<textarea [name]="field.key" [(ngModel)]="form[field.key]" [required]="required(field)" rows="4"></textarea>} @else if (field.type==='image') {<app-image-upload [(value)]="form[field.key]"/>} @else {<input [name]="field.key" [type]="field.type || 'text'" [(ngModel)]="form[field.key]" [required]="required(field)" [step]="field.type==='number'?'any':null">}</label> }</div>@if(section()==='advisories'){<aside class="content-preview"><span class="eyebrow">PREVIEW</span><h2>{{form['title']||'Advisory title'}}</h2><div class="preview-meta">{{label(form['category']||'category')}} · {{label(form['severity']||'severity')}} · {{label(form['status']||'draft')}}</div><p>{{form['content']||'Your advisory content preview will appear here as you write.'}}</p></aside>}@if(section()==='notifications'){<aside class="content-preview notification-preview"><span class="eyebrow">NOTIFICATION PREVIEW</span><h2>{{form['title']||'Notification title'}}</h2><p>{{form['message']||'The message sent to the selected recipient will appear here.'}}</p></aside>}@if (error()) {<div class="alert error">{{error()}}</div>}<div class="form-footer"><button class="button secondary" type="button" (click)="goList()">Cancel</button><button class="button primary" [disabled]="saving()">{{saving()?'Saving…':'Save changes'}}</button></div></form> }
-        </section> }
-        @if (!loading() && !pageError() && (section()==='profile'||section()==='settings')) {<section><div class="page-heading"><div><span class="eyebrow">ACCOUNT</span><h1>{{section()==='settings'?'Settings':'My profile'}}</h1><p>Manage your administrator account details.</p></div></div><form class="panel edit-panel" (ngSubmit)="saveProfile()"><div class="form-grid">@for (field of profileFields; track field.key) {<label>{{field.label}} @if(field.type==='image') {<app-image-upload [(value)]="profileForm[field.key]"/>} @else {<input [name]="field.key" [type]="field.type || 'text'" [(ngModel)]="profileForm[field.key]" [required]="field.key!=='password'">}</label>}</div>@if (error()) {<div class="alert error">{{error()}}</div>}@if (success()) {<div class="alert success">{{success()}}</div>}<div class="form-footer"><button class="button primary" [disabled]="saving()">{{saving()?'Saving…':'Save profile'}}</button></div></form></section> }
-  </div></main>
-  @if(toast()){<div class="toast-message" role="status"><span>✓</span>{{toast()}}<button aria-label="Dismiss notification" (click)="toast.set('')">×</button></div>}
-  @if(deleteCandidate()){<app-confirm-dialog title="Delete record?" [message]="'Delete '+singular().toLowerCase()+' #'+deleteCandidate().id+'? This action cannot be undone.'" confirmLabel="Delete" [busy]="deleteBusy()" (confirm)="confirmDelete()" (cancel)="deleteCandidate.set(null)"/>}
-  </div>`
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    StatCardComponent,
+    StatusBadgeComponent,
+    LoadingSpinnerComponent,
+    EmptyStateComponent,
+    ImageUploadComponent,
+    UserAvatarComponent,
+    ConfirmDialogComponent,
+    CatalogGridComponent,
+    CatalogOverviewComponent,
+    DashboardPageComponent,
+    AnalyticsPageComponent,
+    AppIconComponent,
+    PaginationComponent,
+  ],
+  selector: 'admin-page',
+  styleUrl: './app.css',
+  templateUrl: './app.html',
+  encapsulation: ViewEncapsulation.None,
 })
 export class AdminPage implements OnInit, OnDestroy {
-  readonly api=inject(AdminApi); private router=inject(Router); private subscription?:Subscription;
-  private analyticsApi=inject(AnalyticsService); private agricultureApi=inject(AgricultureService);
-  private categoryApi=inject(CategoryService); private reportApi=inject(CropAndPestReportService);
-  private harvestApi=inject(HarvestBatchService); private marketPriceApi=inject(MarketPriceService);
-  private notificationApi=inject(NotificationService); private orderItemApi=inject(OrderItemService);
-  private orderApi=inject(OrderService); private productApi=inject(ProductService); private profileApi=inject(ProfileService);
-  readonly modules=modules; readonly today=new Intl.DateTimeFormat('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).format(new Date());
-  readonly navigationGroups=navigationGroups;
-  section=signal('dashboard'); mode=signal<'list'|'detail'|'edit'|'create'>('list'); loading=signal(true); saving=signal(false); error=signal(''); pageError=signal(''); success=signal(''); mobileMenu=signal(false); sidebarCollapsed=signal(false);
-  searchOpen=signal(false);searchTerm='';catalogView:'grid'|'table'='grid';availabilityFilter='all';profileMenu=signal(false);notificationMenu=signal(false);headerNotifications=signal<any[]>([]);toast=signal('');deleteCandidate=signal<any>(null);deleteBusy=signal(false);
-  userRoleFilter='all';recordStatusFilter='all';paymentStatusFilter='';lookupFilters:Record<string,string>={};
-  rows=signal<any[]>([]); filteredRows=signal<any[]>([]); selected=signal<any>(null); orderItems=signal<any[]>([]); analytics=signal<any>({}); orders=signal<any[]>([]); reports=signal<any[]>([]); recentUsers=signal<any[]>([]); pendingProfiles=signal<any[]>([]); catalogProducts=signal<any[]>([]); catalogCategories=signal<any[]>([]); catalogBatches=signal<any[]>([]); hasNext=false; offset=0; limit=25; query=''; form:Record<string,any>={}; profileForm:Record<string,any>={};lookupRows:Record<string,any[]>={};
-  profileFields:Field[]=[{key:'first_name',label:'First name',required:true},{key:'middle_name',label:'Middle name'},{key:'last_name',label:'Last name',required:true},{key:'email',label:'Email address',type:'email',required:true},{key:'phone',label:'Phone number',required:true},{key:'avatar',label:'Profile photo',type:'image'},{key:'password',label:'New password (leave blank to keep current)',type:'password'}];
-  module=computed(()=>modules.find(m=>m.key===this.section()) ?? null);
-  pageTitle=computed(()=>this.module()?.title ?? ({dashboard:'Overview',analytics:'Analytics',profile:'My profile',settings:'Settings'} as Record<string,string>)[this.section()] ?? 'Overview');
-  metrics=computed(()=>{const a=this.analytics();return [
-    {label:'Total users',value:this.num(a.users?.total),icon:'♙',tone:'green',context:`${this.num(a.users?.by_role?.farmer)} farmers`},
-    {label:'Farmers',value:this.num(a.users?.by_role?.farmer),icon:'♧',tone:'green',context:'Registered accounts'},
-    {label:'Individual buyers',value:this.num(a.users?.by_role?.buyer),icon:'♙',tone:'blue',context:'Registered accounts'},
-    {label:'Business buyers',value:this.num(a.users?.by_role?.business_buyer),icon:'⌂',tone:'gold',context:'Registered accounts'},
-    {label:'Products',value:this.num(a.catalog?.products_total),icon:'▣',tone:'gold',context:`${this.num(a.catalog?.active_products)} active listings`},
-    {label:'Active inventory',value:this.num(a.catalog?.active_product_quantity),icon:'♧',tone:'green',context:'Available product units'},
-    {label:'Total orders',value:this.num(a.orders?.total),icon:'▤',tone:'blue',context:'All marketplace orders'},
-    {label:'Pending orders',value:this.num(a.orders?.by_status?.pending),icon:'◷',tone:'rose',context:'Awaiting confirmation'},
-    {label:'Pending verifications',value:this.num((a.profiles?.farmer_profiles_by_verification?.pending??0)+(a.profiles?.business_buyer_profiles_by_verification?.pending??0)),icon:'✓',tone:'rose',context:'Farmer and business'},
-    {label:'Reports to review',value:this.num((a.crop_reports?.by_status?.submitted??0)+(a.crop_reports?.by_status?.reviewing??0)),icon:'⚑',tone:'rose',context:'Submitted or reviewing'},
-  ]});
-  analyticsEntries=computed(()=>Object.entries(this.analytics().orders?.by_status ?? {}) as [string,number][]);
-  managementStats=computed(()=>{const a=this.analytics();if(this.section()==='users')return [{label:'Total users',value:this.num(a.users?.total)},{label:'Farmers',value:this.num(a.users?.by_role?.farmer)},{label:'Buyers',value:this.num(a.users?.by_role?.buyer)},{label:'Business buyers',value:this.num(a.users?.by_role?.business_buyer)}];const statuses=this.section()==='farmer-profiles'?a.profiles?.farmer_profiles_by_verification:a.profiles?.business_buyer_profiles_by_verification;if(statuses)return [{label:this.section()==='farmer-profiles'?'Farmer profiles':'Business buyers',value:this.num(Object.values(statuses as Record<string,number>).reduce((sum,value)=>sum+Number(value||0),0))},{label:'Verified',value:this.num((statuses as any).approved)},{label:'Pending verification',value:this.num((statuses as any).pending)},{label:'Rejected',value:this.num((statuses as any).rejected)}];return [];});
-  searchResults=computed(()=>{const q=this.searchTerm.trim().toLowerCase();return q?modules.filter(x=>x.title.toLowerCase().includes(q)||x.key.includes(q)).slice(0,6):[];});
-  unreadNotifications=computed(()=>this.headerNotifications().some(x=>x.is_read==='unread'));
-  navigationItems(group:NavigationGroup){return modules.filter(item=>group.keys.includes(item.key));}
-  sectionTitle='';
-  async ngOnInit(){this.subscription=this.router.events.pipe(filter(e=>e instanceof NavigationEnd)).subscribe(()=>this.loadPage()); await this.loadPage();}
-  ngOnDestroy(){this.subscription?.unsubscribe();}
-  async loadPage(){
-    this.loading.set(true);this.error.set('');this.pageError.set('');this.success.set('');this.mobileMenu.set(false);
-    const parts=this.router.url.split('?')[0].split('/').filter(Boolean);const nextSection=parts[1]??'dashboard';if(nextSection!==this.section()){this.offset=0;this.query='';this.userRoleFilter='all';this.recordStatusFilter='all';this.paymentStatusFilter='';this.availabilityFilter='all';this.lookupFilters={};}this.section.set(nextSection);
-    const module=this.module();this.mode.set(parts[2]==='new'?'create':parts[3]==='edit'?'edit':parts[2]&&parts[2]!=='new'?'detail':'list');
+  readonly api = inject(AdminApi);
+  private router = inject(Router);
+  private subscription?: Subscription;
+  private analyticsApi = inject(AnalyticsService);
+  private agricultureApi = inject(AgricultureService);
+  private categoryApi = inject(CategoryService);
+  private reportApi = inject(CropAndPestReportService);
+  private harvestApi = inject(HarvestBatchService);
+  private marketPriceApi = inject(MarketPriceService);
+  private notificationApi = inject(NotificationService);
+  private orderItemApi = inject(OrderItemService);
+  private orderApi = inject(OrderService);
+  private productApi = inject(ProductService);
+  private profileApi = inject(ProfileService);
+
+  readonly modules = modules;
+  readonly today = new Intl.DateTimeFormat('en-PH', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date());
+  readonly navigationGroups = navigationGroups;
+
+  section = signal('dashboard');
+  mode = signal<'list' | 'detail' | 'edit' | 'create'>('list');
+  loading = signal(true);
+  saving = signal(false);
+  error = signal('');
+  pageError = signal('');
+  success = signal('');
+  mobileMenu = signal(false);
+  sidebarCollapsed = signal(false);
+  searchOpen = signal(false);
+  searchTerm = '';
+  catalogView: 'grid' | 'table' = 'grid';
+  availabilityFilter = 'all';
+  profileMenu = signal(false);
+  notificationMenu = signal(false);
+  headerNotifications = signal<any[]>([]);
+  toast = signal('');
+  deleteCandidate = signal<any>(null);
+  deleteBusy = signal(false);
+  userRoleFilter = 'all';
+  recordStatusFilter = 'all';
+  paymentStatusFilter = '';
+  lookupFilters: Record<string, string> = {};
+
+  rows = signal<any[]>([]);
+  filteredRows = signal<any[]>([]);
+  selected = signal<any>(null);
+  orderItems = signal<any[]>([]);
+  analytics = signal<any>({});
+  orders = signal<any[]>([]);
+  reports = signal<any[]>([]);
+  recentUsers = signal<any[]>([]);
+  pendingProfiles = signal<any[]>([]);
+  catalogProducts = signal<any[]>([]);
+  catalogCategories = signal<any[]>([]);
+  catalogBatches = signal<any[]>([]);
+  hasNext = false;
+  offset = 0;
+  limit = 25;
+  query = '';
+  form: Record<string, any> = {};
+  profileForm: Record<string, any> = {};
+  lookupRows: Record<string, any[]> = {};
+
+  profileFields: Field[] = [
+    { key: 'first_name', label: 'First name', required: true },
+    { key: 'middle_name', label: 'Middle name' },
+    { key: 'last_name', label: 'Last name', required: true },
+    { key: 'email', label: 'Email address', type: 'email', required: true },
+    { key: 'phone', label: 'Phone number', required: true },
+    { key: 'avatar', label: 'Profile photo', type: 'image' },
+    { key: 'password', label: 'New password (leave blank to keep current)', type: 'password' },
+  ];
+
+  module = computed(() => modules.find((m) => m.key === this.section()) ?? null);
+
+  pageTitle = computed(() => {
+    return (
+      this.module()?.title ??
+      ({
+        dashboard: 'Dashboard',
+        analytics: 'Analytics',
+        profile: 'My Profile',
+        settings: 'Settings',
+      } as Record<string, string>)[this.section()] ??
+      'Overview'
+    );
+  });
+
+  metrics = computed(() => {
+    const a = this.analytics();
+    return [
+      {
+        label: 'Total users',
+        value: this.num(a.users?.total),
+        icon: 'users',
+        tone: 'green',
+        context: `${this.num(a.users?.by_role?.farmer)} farmers`,
+      },
+      {
+        label: 'Farmers',
+        value: this.num(a.users?.by_role?.farmer),
+        icon: 'farmer-profiles',
+        tone: 'green',
+        context: 'Registered accounts',
+      },
+      {
+        label: 'Individual buyers',
+        value: this.num(a.users?.by_role?.buyer),
+        icon: 'users',
+        tone: 'blue',
+        context: 'Registered accounts',
+      },
+      {
+        label: 'Business buyers',
+        value: this.num(a.users?.by_role?.business_buyer),
+        icon: 'business-buyer-profiles',
+        tone: 'gold',
+        context: 'Registered accounts',
+      },
+      {
+        label: 'Products',
+        value: this.num(a.catalog?.products_total),
+        icon: 'products',
+        tone: 'gold',
+        context: `${this.num(a.catalog?.active_products)} active listings`,
+      },
+      {
+        label: 'Active inventory',
+        value: this.num(a.catalog?.active_product_quantity),
+        icon: 'harvest-batches',
+        tone: 'green',
+        context: 'Available produce units',
+      },
+      {
+        label: 'Total orders',
+        value: this.num(a.orders?.total),
+        icon: 'orders',
+        tone: 'blue',
+        context: 'Marketplace orders',
+      },
+      {
+        label: 'Pending orders',
+        value: this.num(a.orders?.by_status?.pending),
+        icon: 'orders',
+        tone: 'rose',
+        context: 'Awaiting confirmation',
+      },
+      {
+        label: 'Pending verifications',
+        value: this.num(
+          (a.profiles?.farmer_profiles_by_verification?.pending ?? 0) +
+            (a.profiles?.business_buyer_profiles_by_verification?.pending ?? 0)
+        ),
+        icon: 'check-circle',
+        tone: 'rose',
+        context: 'Farmer & business',
+      },
+      {
+        label: 'Reports to review',
+        value: this.num(
+          (a.crop_reports?.by_status?.submitted ?? 0) + (a.crop_reports?.by_status?.reviewing ?? 0)
+        ),
+        icon: 'crop-reports',
+        tone: 'rose',
+        context: 'Submitted incidents',
+      },
+    ];
+  });
+
+  analyticsEntries = computed(
+    () => Object.entries(this.analytics().orders?.by_status ?? {}) as [string, number][]
+  );
+
+  managementStats = computed(() => {
+    const a = this.analytics();
+    if (this.section() === 'users') {
+      return [
+        { label: 'Total users', value: this.num(a.users?.total) },
+        { label: 'Farmers', value: this.num(a.users?.by_role?.farmer) },
+        { label: 'Buyers', value: this.num(a.users?.by_role?.buyer) },
+        { label: 'Business buyers', value: this.num(a.users?.by_role?.business_buyer) },
+      ];
+    }
+    const statuses =
+      this.section() === 'farmer-profiles'
+        ? a.profiles?.farmer_profiles_by_verification
+        : a.profiles?.business_buyer_profiles_by_verification;
+    if (statuses) {
+      return [
+        {
+          label: this.section() === 'farmer-profiles' ? 'Farmer profiles' : 'Business buyers',
+          value: this.num(
+            Object.values(statuses as Record<string, number>).reduce(
+              (sum, value) => sum + Number(value || 0),
+              0
+            )
+          ),
+        },
+        { label: 'Verified', value: this.num((statuses as any).approved) },
+        { label: 'Pending verification', value: this.num((statuses as any).pending) },
+        { label: 'Rejected', value: this.num((statuses as any).rejected) },
+      ];
+    }
+    return [];
+  });
+
+  searchResults = computed(() => {
+    const q = this.searchTerm.trim().toLowerCase();
+    return q
+      ? modules.filter((x) => x.title.toLowerCase().includes(q) || x.key.includes(q)).slice(0, 6)
+      : [];
+  });
+
+  unreadNotifications = computed(() => this.headerNotifications().some((x) => x.is_read === 'unread'));
+
+  navigationItems(group: NavigationGroup): Module[] {
+    return modules.filter((item) => group.keys.includes(item.key));
+  }
+
+  async ngOnInit(): Promise<void> {
+    this.subscription = this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => this.loadPage());
+    await this.loadPage();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  async loadPage(): Promise<void> {
+    this.loading.set(true);
+    this.error.set('');
+    this.pageError.set('');
+    this.success.set('');
+    this.mobileMenu.set(false);
+
+    const parts = this.router.url.split('?')[0].split('/').filter(Boolean);
+    const nextSection = parts[1] ?? 'dashboard';
+    if (nextSection !== this.section()) {
+      this.offset = 0;
+      this.query = '';
+      this.userRoleFilter = 'all';
+      this.recordStatusFilter = 'all';
+      this.paymentStatusFilter = '';
+      this.availabilityFilter = 'all';
+      this.lookupFilters = {};
+    }
+    this.section.set(nextSection);
+
+    const module = this.module();
+    this.mode.set(
+      parts[2] === 'new' ? 'create' : parts[3] === 'edit' ? 'edit' : parts[2] && parts[2] !== 'new' ? 'detail' : 'list'
+    );
+
     try {
-      if(this.section()==='dashboard'||this.section()==='analytics') await this.loadDashboard();
-      else if(this.section()==='catalog') await this.loadCatalog();
-      else if(this.section()==='profile'||this.section()==='settings') this.profileForm=this.profilePayload(this.api.user()!);
-      else if(module){
-        if(this.mode()==='list') {await this.loadRows();if(module.fields.some(field=>field.lookup)){await this.loadLookups(module.fields);this.hydrateRows();}if(['users','farmer-profiles','business-buyer-profiles'].includes(module.key)){const response=await Promise.allSettled([this.analyticsApi.overview()]);if(response[0].status==='fulfilled')this.analytics.set(response[0].value as any);}}
-        else if(this.mode()==='create') {if(!module.create)throw new Error(`${module.title} cannot be created.`);this.form={};await this.loadLookups(module.fields);}
-        else {const id=Number(parts[2]); let row=this.mode()==='edit'&&history.state?.row?history.state.row:await this.getResource(module.key,id);if(['farmer-profiles','business-buyer-profiles'].includes(module.key)&&row.user_id){try{const account=await this.profileApi.getUser(Number(row.user_id));row={...row,account_name:`${account['first_name']} ${account['last_name']}`,account_email:account['email'],account_phone:account['phone'],avatar:account['avatar']};}catch{/* Keep the profile accessible if its account lookup is unavailable. */}}this.selected.set(row);if(this.mode()==='edit'){this.form=this.toForm(row,module.fields);await this.loadLookups(module.fields);}if(module.key==='orders'&&this.mode()==='detail')this.orderItems.set(await this.orderItemApi.listForOrder(id,{offset:0,limit:100}));}
-      } else if(['analytics','profile'].includes(this.section())) { /* built-in admin pages */ }
-      else this.pageError.set('That admin page could not be found.');
-    } catch(e){this.pageError.set(this.message(e));} finally {this.loading.set(false);}
+      if (this.section() === 'dashboard' || this.section() === 'analytics') {
+        await this.loadDashboard();
+      } else if (this.section() === 'catalog') {
+        await this.loadCatalog();
+      } else if (this.section() === 'profile' || this.section() === 'settings') {
+        this.profileForm = this.profilePayload(this.api.user()!);
+      } else if (module) {
+        if (this.mode() === 'list') {
+          await this.loadRows();
+          if (module.fields.some((field) => field.lookup)) {
+            await this.loadLookups(module.fields);
+            this.hydrateRows();
+          }
+          if (['users', 'farmer-profiles', 'business-buyer-profiles'].includes(module.key)) {
+            const response = await Promise.allSettled([this.analyticsApi.overview()]);
+            if (response[0].status === 'fulfilled') this.analytics.set(response[0].value as any);
+          }
+        } else if (this.mode() === 'create') {
+          if (!module.create) throw new Error(`${module.title} cannot be created.`);
+          this.form = {};
+          await this.loadLookups(module.fields);
+        } else {
+          const id = Number(parts[2]);
+          let row =
+            this.mode() === 'edit' && history.state?.row ? history.state.row : await this.getResource(module.key, id);
+          if (['farmer-profiles', 'business-buyer-profiles'].includes(module.key) && row.user_id) {
+            try {
+              const account = await this.profileApi.getUser(Number(row.user_id));
+              row = {
+                ...row,
+                account_name: `${account['first_name']} ${account['last_name']}`,
+                account_email: account['email'],
+                account_phone: account['phone'],
+                avatar: account['avatar'],
+              };
+            } catch {
+              /* Keep profile accessible if account lookup is unavailable */
+            }
+          }
+          this.selected.set(row);
+          if (this.mode() === 'edit') {
+            this.form = this.toForm(row, module.fields);
+            await this.loadLookups(module.fields);
+          }
+          if (module.key === 'orders' && this.mode() === 'detail') {
+            this.orderItems.set(await this.orderItemApi.listForOrder(id, { offset: 0, limit: 100 }));
+          }
+        }
+      } else if (['analytics', 'profile'].includes(this.section())) {
+        /* built-in pages */
+      } else {
+        this.pageError.set('That admin section could not be found.');
+      }
+    } catch (e) {
+      this.pageError.set(this.message(e));
+    } finally {
+      this.loading.set(false);
+    }
   }
-  async loadDashboard(){const results=await Promise.allSettled([this.analyticsApi.overview(),this.orderApi.list({offset:0,limit:5}),this.reportApi.list({offset:0,limit:5}),this.profileApi.listFarmerProfiles({offset:0,limit:100}),this.profileApi.listBusinessProfiles({offset:0,limit:100}),this.profileApi.listUsers({offset:0,limit:5})]);
-    if(results[0].status==='rejected')throw results[0].reason;this.analytics.set(results[0].value as any);
-    this.orders.set(results[1].status==='fulfilled'?results[1].value as any[]:[]);this.reports.set(results[2].status==='fulfilled'?results[2].value as any[]:[]);
-    this.recentUsers.set(results[5].status==='fulfilled'?results[5].value as any[]:[]);
-    const farmers=results[3].status==='fulfilled'?results[3].value as any[]:[];const businesses=results[4].status==='fulfilled'?results[4].value as any[]:[];
-    this.pendingProfiles.set([...farmers.filter(x=>x.verification_status==='pending').map(x=>({...x,name:x.farm_name,kind:'farmer'})),...businesses.filter(x=>x.verification_status==='pending').map(x=>({...x,name:x.business_name,kind:'business'}))].slice(0,5));
+
+  async loadDashboard(): Promise<void> {
+    const results = await Promise.allSettled([
+      this.analyticsApi.overview(),
+      this.orderApi.list({ offset: 0, limit: 5 }),
+      this.reportApi.list({ offset: 0, limit: 5 }),
+      this.profileApi.listFarmerProfiles({ offset: 0, limit: 100 }),
+      this.profileApi.listBusinessProfiles({ offset: 0, limit: 100 }),
+      this.profileApi.listUsers({ offset: 0, limit: 5 }),
+    ]);
+
+    if (results[0].status === 'rejected') throw results[0].reason;
+    this.analytics.set(results[0].value as any);
+    this.orders.set(results[1].status === 'fulfilled' ? (results[1].value as any[]) : []);
+    this.reports.set(results[2].status === 'fulfilled' ? (results[2].value as any[]) : []);
+    this.recentUsers.set(results[5].status === 'fulfilled' ? (results[5].value as any[]) : []);
+
+    const farmers = results[3].status === 'fulfilled' ? (results[3].value as any[]) : [];
+    const businesses = results[4].status === 'fulfilled' ? (results[4].value as any[]) : [];
+    this.pendingProfiles.set([
+      ...farmers.filter((x) => x.verification_status === 'pending').map((x) => ({ ...x, name: x.farm_name, kind: 'farmer' })),
+      ...businesses.filter((x) => x.verification_status === 'pending').map((x) => ({ ...x, name: x.business_name, kind: 'business' })),
+    ].slice(0, 5));
   }
-  async loadCatalog(){const results=await Promise.allSettled([this.analyticsApi.overview(),this.productApi.list({offset:0,limit:5}),this.categoryApi.list({offset:0,limit:500}),this.harvestApi.list({offset:0,limit:5})]);if(results.every(result=>result.status==='rejected'))throw new Error('Catalog data is currently unavailable.');this.analytics.set(results[0].status==='fulfilled'?results[0].value as any:{});this.catalogProducts.set(results[1].status==='fulfilled'?results[1].value as any[]:[]);this.catalogCategories.set(results[2].status==='fulfilled'?results[2].value as any[]:[]);this.catalogBatches.set(results[3].status==='fulfilled'?results[3].value as any[]:[]);}
-  async loadRows(){const data=await this.listResource(this.module()!.key,{offset:this.offset,limit:this.limit+1});this.hasNext=data.length>this.limit;let pageRows=data.slice(0,this.limit);if(['farmer-profiles','business-buyer-profiles','orders','crop-reports','notifications'].includes(this.section())){const [usersResult,productsResult]=await Promise.allSettled([this.profileApi.listUsers({offset:0,limit:500}),this.productApi.list({offset:0,limit:500})]);const users=usersResult.status==='fulfilled'?usersResult.value as any[]:[];const products=productsResult.status==='fulfilled'?productsResult.value as any[]:[];const userById=new Map(users.map(user=>[user.id,user]));const productById=new Map(products.map(product=>[product.id,product]));pageRows=pageRows.map(row=>{const user=userById.get(row.user_id??row.buyer_id??row.farmer_id);const product=productById.get(row.product_id);return {...row,...(user?{user_name:`${user.first_name} ${user.last_name}`,user_email:user.email,recipient_name:`${user.first_name} ${user.last_name}`,recipient_email:user.email,avatar:user.avatar,buyer_name:`${user.first_name} ${user.last_name}`,farmer_name:row.farmer_id?`${user.first_name} ${user.last_name}`:row.farmer_name}:{}),...(product?{product_name:product.name,crop_name:product.name}:{} )};});}this.rows.set(pageRows);this.filteredRows.set(pageRows);this.filterRows();}
-  private listResource(key:string,query:{offset:number;limit:number}):Promise<any[]>{switch(key){
-    case 'users':return this.profileApi.listUsers(query); case 'categories':return this.categoryApi.list(query);
-    case 'products':return this.productApi.list(query); case 'harvest-batches':return this.harvestApi.list(query);
-    case 'farmer-profiles':return this.profileApi.listFarmerProfiles(query); case 'business-buyer-profiles':return this.profileApi.listBusinessProfiles(query);
-    case 'market-prices':return this.marketPriceApi.list(query); case 'advisories':return this.agricultureApi.list(query);
-    case 'crop-reports':return this.reportApi.list(query); case 'notifications':return this.notificationApi.list(query);
-    case 'orders':return this.orderApi.list(query); default:return Promise.reject(new Error('Unsupported admin resource.'));
-  }}
-  private getResource(key:string,id:number):Promise<any>{switch(key){
-    case 'users':return this.profileApi.getUser(id); case 'categories':return this.categoryApi.get(id);
-    case 'products':return this.productApi.get(id); case 'harvest-batches':return this.harvestApi.get(id);
-    case 'farmer-profiles':return this.profileApi.getFarmerProfile(id); case 'business-buyer-profiles':return this.profileApi.getBusinessProfile(id);
-    case 'market-prices':return this.marketPriceApi.get(id); case 'advisories':return this.agricultureApi.get(id);
-    case 'crop-reports':return this.reportApi.get(id); case 'notifications':return this.notificationApi.get(id);
-    case 'orders':return this.orderApi.get(id); default:return Promise.reject(new Error('Unsupported admin resource.'));
-  }}
-  private createResource(key:string,data:Record<string,any>):Promise<any>{switch(key){
-    case 'users':return this.profileApi.createUser(data); case 'categories':return this.categoryApi.create(data);
-    case 'products':return this.productApi.create(data); case 'harvest-batches':return this.harvestApi.create(data);
-    case 'farmer-profiles':return this.profileApi.createFarmerProfile(data); case 'business-buyer-profiles':return this.profileApi.createBusinessProfile(data);
-    case 'market-prices':return this.marketPriceApi.create(data); case 'advisories':return this.agricultureApi.create(data);
-    case 'crop-reports':return this.reportApi.create(data); case 'notifications':return this.notificationApi.create(data);
-    default:return Promise.reject(new Error('This resource cannot be created here.'));
-  }}
-  private updateResource(key:string,id:number,data:Record<string,any>):Promise<any>{switch(key){
-    case 'users':return this.profileApi.updateUser(id,data); case 'categories':return this.categoryApi.update(id,data);
-    case 'products':return this.productApi.update(id,data); case 'harvest-batches':return this.harvestApi.update(id,data);
-    case 'farmer-profiles':return this.profileApi.updateFarmerProfile(id,data); case 'business-buyer-profiles':return this.profileApi.updateBusinessProfile(id,data);
-    case 'market-prices':return this.marketPriceApi.update(id,data); case 'advisories':return this.agricultureApi.update(id,data);
-    case 'crop-reports':return this.reportApi.update(id,data); case 'notifications':return this.notificationApi.update(id,data);
-    case 'orders':return this.orderApi.update(id,data); default:return Promise.reject(new Error('Unsupported admin resource.'));
-  }}
-  private deleteResource(key:string,id:number):Promise<void>{switch(key){
-    case 'users':return this.profileApi.removeUser(id); case 'categories':return this.categoryApi.remove(id);
-    case 'products':return this.productApi.remove(id); case 'harvest-batches':return this.harvestApi.remove(id);
-    case 'farmer-profiles':return this.profileApi.removeFarmerProfile(id); case 'business-buyer-profiles':return this.profileApi.removeBusinessProfile(id);
-    case 'market-prices':return this.marketPriceApi.remove(id); case 'advisories':return this.agricultureApi.remove(id);
-    case 'crop-reports':return this.reportApi.remove(id); case 'notifications':return this.notificationApi.remove(id);
-    default:return Promise.reject(new Error('This resource cannot be deleted here.'));
-  }}
-  filterRows(){const q=this.query.toLowerCase().trim();this.filteredRows.set(this.rows().filter(row=>{const matchText=!q||Object.values(row).some(v=>String(v??'').toLowerCase().includes(q));const matchRole=this.section()!=='users'||this.userRoleFilter==='all'||row.role===this.userRoleFilter;const status=row.status??row.verification_status??row.is_read;const matchStatus=this.recordStatusFilter==='all'||status===this.recordStatusFilter;const matchPayment=this.section()!=='orders'||!this.paymentStatusFilter||row.payment_status===this.paymentStatusFilter;const matchAvailability=this.section()!=='products'||this.availabilityFilter==='all'||(this.availabilityFilter==='available'?Number(row.available_quantity)>0:Number(row.available_quantity)<=0);const matchLookups=Object.entries(this.lookupFilters).every(([key,value])=>!value||String(row[key])===value);return matchText&&matchRole&&matchStatus&&matchPayment&&matchAvailability&&matchLookups;}));}
-  async page(direction:number){this.offset=Math.max(0,this.offset+direction*this.limit);this.loading.set(true);try{await this.loadRows();}catch(e){this.error.set(this.message(e));}finally{this.loading.set(false);}}
-  columns(){const map:Record<string,string[]>={users:['id','first_name','email','phone','role','status','created_at'],categories:['id','image','name','description'],products:['id','name','farmer_name','category_name','price_per_unit','available_quantity','status'],'harvest-batches':['id','batch_code','product_name','farmer_name','quantity','remaining_quantity','status'],'farmer-profiles':['avatar','id','farm_name','user_name','user_email','municipality','province','verification_status'],'business-buyer-profiles':['avatar','id','business_name','business_type','user_name','province','verification_status'],'market-prices':['id','product_name','market_name','municipality','average_price','recorded_date','verified_by'],'advisories':['id','title','category','municipality','severity','status'],'crop-reports':['id','report_type','farmer_name','product_name','severity','status','created_at'],'notifications':['id','title','recipient_name','recipient_email','is_read','created_at'],'orders':['id','order_number','buyer_name','total_amount','status','payment_status']};return (map[this.section()]??(this.rows().length?Object.keys(this.rows()[0]).slice(0,6):[])).filter(k=>this.rows().some(row=>k in row));}
-  statusOptions(){const values=this.rows().map(row=>row.status??row.verification_status??row.is_read).filter(Boolean);return [...new Set(values)] as string[];}
-  paymentStatusOptions(){return [...new Set(this.rows().map(row=>row.payment_status).filter(Boolean))] as string[];}
-  lookupFields(){return [...new Map((this.module()?.fields??[]).filter(field=>field.lookup).map(field=>[field.key,field])).values()];}
-  detailEntries(){return Object.entries(this.selected()??{}).filter(([k])=>!['avatar','image'].includes(k));}
-  editableFields(){return this.module()!.fields.filter(f=>!(this.mode()==='create'&&this.module()!.key==='orders')&&!(this.module()!.key==='users'&&this.mode()==='edit'&&f.key==='password')&&!(this.module()!.key==='harvest-batches'&&f.key==='batch_code'));}
-  required(field:Field){return !!field.required||(this.module()?.key==='users'&&this.mode()==='create'&&field.key==='password');}
-  managementDescription(){return ({users:'Manage farmers, buyers, business buyers, and administrator accounts.','farmer-profiles':'Review farmer registrations and their agricultural profiles.','business-buyer-profiles':'Manage business accounts and wholesale buyer registrations.',products:'Manage agricultural products and marketplace listings.',categories:'Organize agricultural products into marketplace categories.','harvest-batches':'Monitor harvest records, quantities, and produce availability.',orders:'Monitor marketplace transactions and fulfillment.','market-prices':'Manage and verify agricultural commodity pricing information.',advisories:'Create and manage agricultural guidance for FarmerLink users.','crop-reports':'Review crop damage, pest incidents, and farmer reports.',notifications:'Monitor and manage notifications sent to FarmerLink users.'} as Record<string,string>)[this.section()]??`Review and manage ${this.module()?.title.toLowerCase()} across FarmerLink.`;}
-  singular(){return this.module()?.title.replace(/s$/,'')??'record';}
-  label(key:string){if(key==='first_name')return 'User';if(key==='farmer_name')return 'Farmer';if(key==='category_name')return 'Category';if(key==='product_name'||key==='crop_name')return 'Product';if(key==='user_name'||key==='buyer_name'||key==='farmer_name')return key==='buyer_name'?'Buyer':'Account';if(key==='user_email')return 'Account email';if(key==='account_name')return 'Account holder';if(key==='account_email')return 'Account email';if(key==='account_phone')return 'Account phone';return key.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());}
-  formatValue(value:any){if(value===null||value===undefined||value==='')return '—';if(typeof value==='object')return JSON.stringify(value);return String(value);}
-  displayCell(row:any,column:string){const value=row[column];if(value===null||value===undefined||value==='')return '—';if(column.includes('price')||column==='average_price'||column==='total_amount')return `₱${this.money(value)}`;if(column.endsWith('_id'))return `#${value}`;if(column.endsWith('_at')||column.endsWith('_date'))return this.date(value);return this.formatValue(value);}
-  date(value:any){if(!value)return '—';const d=new Date(value);return Number.isNaN(d.valueOf())?'—':new Intl.DateTimeFormat('en-PH',{month:'short',day:'numeric',year:'numeric'}).format(d);}
-  barWidth(value:number,values:number[]=this.analyticsEntries().map(e=>Number(e[1]))){const max=Math.max(1,...values);return Number(value)/max*100;}
-  objectEntries(value:unknown):[string,number][]{return value&&typeof value==='object'?Object.entries(value as Record<string,number>):[];}
-  userRoleValues(){return this.objectEntries(this.analytics().users?.by_role).map(x=>x[1]);}
-  catalogValues(){return this.objectEntries(this.analytics().catalog?.products_by_status).map(x=>x[1]);}
-  paymentValues(){return this.objectEntries(this.analytics().orders?.by_payment_status).map(x=>x[1]);}
-  farmerVerificationValues(){return this.objectEntries(this.analytics().profiles?.farmer_profiles_by_verification).map(x=>x[1]);}
-  reportValues(){return this.objectEntries(this.analytics().crop_reports?.by_status).map(x=>x[1]);}
-  money(value:unknown){return Number(value??0).toLocaleString('en-PH',{maximumFractionDigits:2});}
-  num(value:any){return value===null||value===undefined||value===''?'—':Number(value).toLocaleString('en-PH');}
-  firstName(){return this.api.user()?.first_name||'Administrator';}
-  displayName(){const u=this.api.user();return u?`${u.first_name} ${u.last_name}`:'Administrator';}
-  initials(){const u=this.api.user();return `${u?.first_name?.[0]??'A'}${u?.last_name?.[0]??'D'}`.toUpperCase();}
-  greeting(){const h=new Date().getHours();return `${h<12?'GOOD MORNING':h<18?'GOOD AFTERNOON':'GOOD EVENING'}, ADMINISTRATOR`;}
-  async startCreate(){this.form={};this.error.set('');try{await this.loadLookups(this.module()!.fields);this.mode.set('create');}catch(e){this.error.set(this.message(e));}}
-  async startEdit(row:any){this.selected.set(row);this.form=this.toForm(row,this.module()!.fields);this.error.set('');try{await this.loadLookups(this.module()!.fields);this.mode.set('edit');}catch(e){this.error.set(this.message(e));}}
-  private async loadLookups(fields:Field[]){const keys=[...new Set(fields.map(f=>f.lookup).filter((x):x is string=>!!x))];const result=await Promise.all(keys.map(async key=>[key,await this.lookupList(key)] as const));this.lookupRows=Object.fromEntries(result);}
-  private lookupList(key:string):Promise<any[]>{switch(key){case 'users':return this.profileApi.listUsers({offset:0,limit:500});case 'categories':return this.categoryApi.list({offset:0,limit:500});case 'products':return this.productApi.list({offset:0,limit:500});default:return Promise.resolve([]);}}
-  hydrateRows(){const displayKeys:Record<string,string>={farmer_id:'farmer_name',category_id:'category_name',product_id:'product_name',user_id:'user_name'};const fields=this.module()?.fields??[];this.rows.set(this.rows().map(row=>{const additions:Record<string,any>={};for(const field of fields){if(!field.lookup||!displayKeys[field.key])continue;const match=(this.lookupRows[field.lookup]??[]).find(item=>String(item.id)===String(row[field.key]));if(match){const target=displayKeys[field.key];additions[target]=field.lookup==='users'?`${match.first_name} ${match.last_name}`:match.name??match.title??`#${match.id}`;if(field.lookup==='users'&&field.key==='user_id'){additions['user_email']=match.email;additions['avatar']=match.avatar;}}}return {...row,...additions};}));this.filterRows();}
-  lookupOptions(field:Field){const rows=this.lookupRows[field.lookup??'']??[];return field.role?rows.filter(row=>row.role===field.role):rows;}
-  lookupLabel(key:string,row:any){if(key==='users')return `#${row.id} · ${row.first_name} ${row.last_name} · ${row.email}`;return `#${row.id} · ${row.name??row.title??'Record'}`;}
-  openDetail(id:number){this.router.navigate(['/admin',this.section(),id]);}
-  goList(){this.router.navigate(['/admin',this.section()]);}
-  pageList(){return this.router.navigate(['/admin',this.section()]);}
-  toForm(row:any,fields:Field[]){const result:Record<string,any>={};for(const f of fields){let value=row[f.key]??'';if(f.type==='datetime-local'&&value)value=new Date(value).toISOString().slice(0,16);result[f.key]=value;}return result;}
-  async save(){this.saving.set(true);this.error.set('');try{const module=this.module()!;const payload:Record<string,any>={};for(const field of this.editableFields()){const value=this.form[field.key];if(field.type==='image'&&this.mode()==='edit'&&value===this.selected()?.[field.key])continue;if(value!==''&&value!==undefined&&value!==null){payload[field.key]=field.lookup||field.type==='number'?Number(value):field.type==='datetime-local'?new Date(value).toISOString():value;}else if(this.mode()==='edit'&&value==='')payload[field.key]=null;}if(module.key==='users'&&this.mode()==='create'&&payload['middle_name']===undefined)payload['middle_name']='';
-      if(module.key==='users'&&this.mode()==='edit'&&!payload['password'])delete payload['password'];
-      const id=this.selected()?.id;if(this.mode()==='create')await this.createResource(module.key,payload);else await this.updateResource(module.key,id,payload);this.announce(`${this.singular()} ${this.mode()==='create'?'created':'updated'} successfully.`);this.router.navigate(['/admin',module.key]);
-    }catch(e){this.error.set(this.message(e));}finally{this.saving.set(false);}}
-  async remove(row:any){this.deleteCandidate.set(row);}
-  async confirmDelete(){const row=this.deleteCandidate();if(!row)return;this.deleteBusy.set(true);try{await this.deleteResource(this.module()!.key,row.id);this.deleteCandidate.set(null);this.announce(`${this.singular()} deleted successfully.`);if(this.mode()==='detail')this.goList();else await this.loadRows();}catch(e){this.error.set(this.message(e));}finally{this.deleteBusy.set(false);}}
-  async saveProfile(){this.saving.set(true);this.error.set('');this.success.set('');try{const payload={...this.profileForm};if(!payload['password'])delete payload['password'];if(payload['avatar']===this.api.user()?.avatar)delete payload['avatar'];const updated=await this.profileApi.updateUser(this.api.user()!.id,payload);this.api.user.set(updated);this.success.set('Your profile has been updated.');}catch(e){this.error.set(this.message(e));}finally{this.saving.set(false);}}
-  profilePayload(user:AdminUser){return {first_name:user.first_name,middle_name:user.middle_name??'',last_name:user.last_name,email:user.email,phone:user.phone,avatar:user.avatar??null,password:''};}
-  toggleSidebar(){if(window.matchMedia('(max-width: 760px)').matches)this.mobileMenu.set(!this.mobileMenu());else this.sidebarCollapsed.set(!this.sidebarCollapsed());}
-  closeOverlays(){this.profileMenu.set(false);this.notificationMenu.set(false);this.searchOpen.set(false);}
-  onWorkspaceClick(event:MouseEvent){const target=event.target as HTMLElement;if(!target.closest('.dropdown-anchor')&&!target.closest('.top-search'))this.closeOverlays();}
-  async toggleNotifications(){this.profileMenu.set(false);const opening=!this.notificationMenu();this.notificationMenu.set(opening);if(opening&&!this.headerNotifications().length){try{this.headerNotifications.set(await this.notificationApi.list({offset:0,limit:8}));}catch(e){this.announce(this.message(e));}}}
-  announce(message:string){this.toast.set(message);setTimeout(()=>{if(this.toast()===message)this.toast.set('');},4000);}
-  async signOut(){this.api.logout();await this.router.navigate(['/login']);}
-  private message(e:unknown){return e instanceof Error?e.message:'Something went wrong. Please try again.';}
+
+  async loadCatalog(): Promise<void> {
+    const results = await Promise.allSettled([
+      this.analyticsApi.overview(),
+      this.productApi.list({ offset: 0, limit: 5 }),
+      this.categoryApi.list({ offset: 0, limit: 500 }),
+      this.harvestApi.list({ offset: 0, limit: 5 }),
+    ]);
+    if (results.every((result) => result.status === 'rejected')) {
+      throw new Error('Catalog data is currently unavailable.');
+    }
+    this.analytics.set(results[0].status === 'fulfilled' ? (results[0].value as any) : {});
+    this.catalogProducts.set(results[1].status === 'fulfilled' ? (results[1].value as any[]) : []);
+    this.catalogCategories.set(results[2].status === 'fulfilled' ? (results[2].value as any[]) : []);
+    this.catalogBatches.set(results[3].status === 'fulfilled' ? (results[3].value as any[]) : []);
+  }
+
+  async loadRows(): Promise<void> {
+    const data = await this.listResource(this.module()!.key, { offset: this.offset, limit: this.limit + 1 });
+    this.hasNext = data.length > this.limit;
+    let pageRows = data.slice(0, this.limit);
+
+    if (['farmer-profiles', 'business-buyer-profiles', 'orders', 'crop-reports', 'notifications'].includes(this.section())) {
+      const [usersResult, productsResult] = await Promise.allSettled([
+        this.profileApi.listUsers({ offset: 0, limit: 500 }),
+        this.productApi.list({ offset: 0, limit: 500 }),
+      ]);
+      const users = usersResult.status === 'fulfilled' ? (usersResult.value as any[]) : [];
+      const products = productsResult.status === 'fulfilled' ? (productsResult.value as any[]) : [];
+      const userById = new Map(users.map((user) => [user.id, user]));
+      const productById = new Map(products.map((product) => [product.id, product]));
+
+      pageRows = pageRows.map((row) => {
+        const user = userById.get(row.user_id ?? row.buyer_id ?? row.farmer_id);
+        const product = productById.get(row.product_id);
+        return {
+          ...row,
+          ...(user
+            ? {
+                user_name: `${user.first_name} ${user.last_name}`,
+                user_email: user.email,
+                recipient_name: `${user.first_name} ${user.last_name}`,
+                recipient_email: user.email,
+                avatar: user.avatar,
+                buyer_name: `${user.first_name} ${user.last_name}`,
+                farmer_name: row.farmer_id ? `${user.first_name} ${user.last_name}` : row.farmer_name,
+              }
+            : {}),
+          ...(product ? { product_name: product.name, crop_name: product.name } : {}),
+        };
+      });
+    }
+
+    this.rows.set(pageRows);
+    this.filteredRows.set(pageRows);
+    this.filterRows();
+  }
+
+  private listResource(key: string, query: { offset: number; limit: number }): Promise<any[]> {
+    switch (key) {
+      case 'users':
+        return this.profileApi.listUsers(query);
+      case 'categories':
+        return this.categoryApi.list(query);
+      case 'products':
+        return this.productApi.list(query);
+      case 'harvest-batches':
+        return this.harvestApi.list(query);
+      case 'farmer-profiles':
+        return this.profileApi.listFarmerProfiles(query);
+      case 'business-buyer-profiles':
+        return this.profileApi.listBusinessProfiles(query);
+      case 'market-prices':
+        return this.marketPriceApi.list(query);
+      case 'advisories':
+        return this.agricultureApi.list(query);
+      case 'crop-reports':
+        return this.reportApi.list(query);
+      case 'notifications':
+        return this.notificationApi.list(query);
+      case 'orders':
+        return this.orderApi.list(query);
+      default:
+        return Promise.reject(new Error('Unsupported admin resource.'));
+    }
+  }
+
+  private getResource(key: string, id: number): Promise<any> {
+    switch (key) {
+      case 'users':
+        return this.profileApi.getUser(id);
+      case 'categories':
+        return this.categoryApi.get(id);
+      case 'products':
+        return this.productApi.get(id);
+      case 'harvest-batches':
+        return this.harvestApi.get(id);
+      case 'farmer-profiles':
+        return this.profileApi.getFarmerProfile(id);
+      case 'business-buyer-profiles':
+        return this.profileApi.getBusinessProfile(id);
+      case 'market-prices':
+        return this.marketPriceApi.get(id);
+      case 'advisories':
+        return this.agricultureApi.get(id);
+      case 'crop-reports':
+        return this.reportApi.get(id);
+      case 'notifications':
+        return this.notificationApi.get(id);
+      case 'orders':
+        return this.orderApi.get(id);
+      default:
+        return Promise.reject(new Error('Unsupported admin resource.'));
+    }
+  }
+
+  private createResource(key: string, data: Record<string, any>): Promise<any> {
+    switch (key) {
+      case 'users':
+        return this.profileApi.createUser(data);
+      case 'categories':
+        return this.categoryApi.create(data);
+      case 'products':
+        return this.productApi.create(data);
+      case 'harvest-batches':
+        return this.harvestApi.create(data);
+      case 'farmer-profiles':
+        return this.profileApi.createFarmerProfile(data);
+      case 'business-buyer-profiles':
+        return this.profileApi.createBusinessProfile(data);
+      case 'market-prices':
+        return this.marketPriceApi.create(data);
+      case 'advisories':
+        return this.agricultureApi.create(data);
+      case 'crop-reports':
+        return this.reportApi.create(data);
+      case 'notifications':
+        return this.notificationApi.create(data);
+      default:
+        return Promise.reject(new Error('This resource cannot be created here.'));
+    }
+  }
+
+  private updateResource(key: string, id: number, data: Record<string, any>): Promise<any> {
+    switch (key) {
+      case 'users':
+        return this.profileApi.updateUser(id, data);
+      case 'categories':
+        return this.categoryApi.update(id, data);
+      case 'products':
+        return this.productApi.update(id, data);
+      case 'harvest-batches':
+        return this.harvestApi.update(id, data);
+      case 'farmer-profiles':
+        return this.profileApi.updateFarmerProfile(id, data);
+      case 'business-buyer-profiles':
+        return this.profileApi.updateBusinessProfile(id, data);
+      case 'market-prices':
+        return this.marketPriceApi.update(id, data);
+      case 'advisories':
+        return this.agricultureApi.update(id, data);
+      case 'crop-reports':
+        return this.reportApi.update(id, data);
+      case 'notifications':
+        return this.notificationApi.update(id, data);
+      case 'orders':
+        return this.orderApi.update(id, data);
+      default:
+        return Promise.reject(new Error('Unsupported admin resource.'));
+    }
+  }
+
+  private deleteResource(key: string, id: number): Promise<void> {
+    switch (key) {
+      case 'users':
+        return this.profileApi.removeUser(id);
+      case 'categories':
+        return this.categoryApi.remove(id);
+      case 'products':
+        return this.productApi.remove(id);
+      case 'harvest-batches':
+        return this.harvestApi.remove(id);
+      case 'farmer-profiles':
+        return this.profileApi.removeFarmerProfile(id);
+      case 'business-buyer-profiles':
+        return this.profileApi.removeBusinessProfile(id);
+      case 'market-prices':
+        return this.marketPriceApi.remove(id);
+      case 'advisories':
+        return this.agricultureApi.remove(id);
+      case 'crop-reports':
+        return this.reportApi.remove(id);
+      case 'notifications':
+        return this.notificationApi.remove(id);
+      default:
+        return Promise.reject(new Error('This resource cannot be deleted here.'));
+    }
+  }
+
+  filterRows(): void {
+    const q = this.query.toLowerCase().trim();
+    this.filteredRows.set(
+      this.rows().filter((row) => {
+        const matchText =
+          !q || Object.values(row).some((v) => String(v ?? '').toLowerCase().includes(q));
+        const matchRole =
+          this.section() !== 'users' || this.userRoleFilter === 'all' || row.role === this.userRoleFilter;
+        const status = row.status ?? row.verification_status ?? row.is_read;
+        const matchStatus = this.recordStatusFilter === 'all' || status === this.recordStatusFilter;
+        const matchPayment =
+          this.section() !== 'orders' || !this.paymentStatusFilter || row.payment_status === this.paymentStatusFilter;
+        const matchAvailability =
+          this.section() !== 'products' ||
+          this.availabilityFilter === 'all' ||
+          (this.availabilityFilter === 'available'
+            ? Number(row.available_quantity) > 0
+            : Number(row.available_quantity) <= 0);
+        const matchLookups = Object.entries(this.lookupFilters).every(
+          ([key, value]) => !value || String(row[key]) === value
+        );
+        return matchText && matchRole && matchStatus && matchPayment && matchAvailability && matchLookups;
+      })
+    );
+  }
+
+  async page(direction: number): Promise<void> {
+    this.offset = Math.max(0, this.offset + direction * this.limit);
+    this.loading.set(true);
+    try {
+      await this.loadRows();
+    } catch (e) {
+      this.error.set(this.message(e));
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  columns(): string[] {
+    const map: Record<string, string[]> = {
+      users: ['id', 'first_name', 'email', 'phone', 'role', 'status', 'created_at'],
+      categories: ['id', 'image', 'name', 'description'],
+      products: ['id', 'name', 'farmer_name', 'category_name', 'price_per_unit', 'available_quantity', 'status'],
+      'harvest-batches': ['id', 'batch_code', 'product_name', 'farmer_name', 'quantity', 'remaining_quantity', 'status'],
+      'farmer-profiles': ['avatar', 'id', 'farm_name', 'user_name', 'user_email', 'municipality', 'province', 'verification_status'],
+      'business-buyer-profiles': ['avatar', 'id', 'business_name', 'business_type', 'user_name', 'province', 'verification_status'],
+      'market-prices': ['id', 'product_name', 'market_name', 'municipality', 'average_price', 'recorded_date', 'verified_by'],
+      advisories: ['id', 'title', 'category', 'municipality', 'severity', 'status'],
+      'crop-reports': ['id', 'report_type', 'farmer_name', 'product_name', 'severity', 'status', 'created_at'],
+      notifications: ['id', 'title', 'recipient_name', 'recipient_email', 'is_read', 'created_at'],
+      orders: ['id', 'order_number', 'buyer_name', 'total_amount', 'status', 'payment_status'],
+    };
+    return (map[this.section()] ?? (this.rows().length ? Object.keys(this.rows()[0]).slice(0, 6) : [])).filter((k) =>
+      this.rows().some((row) => k in row)
+    );
+  }
+
+  statusOptions(): string[] {
+    const values = this.rows().map((row) => row.status ?? row.verification_status ?? row.is_read).filter(Boolean);
+    return [...new Set(values)] as string[];
+  }
+
+  paymentStatusOptions(): string[] {
+    return [...new Set(this.rows().map((row) => row.payment_status).filter(Boolean))] as string[];
+  }
+
+  lookupFields(): Field[] {
+    return [...new Map((this.module()?.fields ?? []).filter((field) => field.lookup).map((field) => [field.key, field])).values()];
+  }
+
+  detailEntries(): [string, any][] {
+    return Object.entries(this.selected() ?? {}).filter(([k]) => !['avatar', 'image'].includes(k));
+  }
+
+  editableFields(): Field[] {
+    return this.module()!.fields.filter(
+      (f) =>
+        !(this.mode() === 'create' && this.module()!.key === 'orders') &&
+        !(this.module()!.key === 'users' && this.mode() === 'edit' && f.key === 'password') &&
+        !(this.module()!.key === 'harvest-batches' && f.key === 'batch_code')
+    );
+  }
+
+  required(field: Field): boolean {
+    return !!field.required || (this.module()?.key === 'users' && this.mode() === 'create' && field.key === 'password');
+  }
+
+  managementDescription(): string {
+    return (
+      ({
+        users: 'Manage farmers, individual buyers, commercial business buyers, and administrator accounts.',
+        'farmer-profiles': 'Review farmer registrations, agricultural land records, and verification status.',
+        'business-buyer-profiles': 'Manage commercial accounts, restaurant partners, and wholesale buyer registrations.',
+        products: 'Manage agricultural products, marketplace listings, quality grades, and pricing.',
+        categories: 'Organize agricultural commodities and produce into marketplace categories.',
+        'harvest-batches': 'Monitor farm produce harvests, expiration dates, and warehouse batch availability.',
+        orders: 'Track customer order fulfillment pipeline, payment statuses, and delivery notes.',
+        'market-prices': 'Record and verify regional commodity market prices across municipalities.',
+        advisories: 'Publish weather alerts, pest management guidance, and government advisories.',
+        'crop-reports': 'Audit crop damage, flood incidents, and pest reports submitted by farmers.',
+        notifications: 'Monitor automated platform notifications sent to FarmerLink users.',
+      } as Record<string, string>)[this.section()] ?? `Review and manage ${this.module()?.title.toLowerCase()} across FarmerLink.`
+    );
+  }
+
+  singular(): string {
+    return this.module()?.title.replace(/s$/, '') ?? 'record';
+  }
+
+  label(key: string): string {
+    if (key === 'first_name') return 'User';
+    if (key === 'farmer_name') return 'Farmer';
+    if (key === 'category_name') return 'Category';
+    if (key === 'product_name' || key === 'crop_name') return 'Product';
+    if (key === 'user_name' || key === 'buyer_name') return key === 'buyer_name' ? 'Buyer' : 'Account';
+    if (key === 'user_email') return 'Account email';
+    if (key === 'account_name') return 'Account holder';
+    if (key === 'account_email') return 'Account email';
+    if (key === 'account_phone') return 'Account phone';
+    return key.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+
+  formatValue(value: any): string {
+    if (value === null || value === undefined || value === '') return '—';
+    if (typeof value === 'object') return JSON.stringify(value);
+    return String(value);
+  }
+
+  displayCell(row: any, column: string): string {
+    const value = row[column];
+    if (value === null || value === undefined || value === '') return '—';
+    if (column.includes('price') || column === 'average_price' || column === 'total_amount') {
+      return `₱${this.money(value)}`;
+    }
+    if (column.endsWith('_id')) return `#${value}`;
+    if (column.endsWith('_at') || column.endsWith('_date')) return this.date(value);
+    return this.formatValue(value);
+  }
+
+  date(value: any): string {
+    if (!value) return '—';
+    const d = new Date(value);
+    return Number.isNaN(d.valueOf())
+      ? '—'
+      : new Intl.DateTimeFormat('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }).format(d);
+  }
+
+  money(value: unknown): string {
+    return Number(value ?? 0).toLocaleString('en-PH', { maximumFractionDigits: 2 });
+  }
+
+  num(value: any): string {
+    return value === null || value === undefined || value === '' ? '—' : Number(value).toLocaleString('en-PH');
+  }
+
+  firstName(): string {
+    return this.api.user()?.first_name || 'Administrator';
+  }
+
+  displayName(): string {
+    const u = this.api.user();
+    return u ? `${u.first_name} ${u.last_name}` : 'Administrator';
+  }
+
+  async startCreate(): Promise<void> {
+    this.form = {};
+    this.error.set('');
+    try {
+      await this.loadLookups(this.module()!.fields);
+      this.mode.set('create');
+    } catch (e) {
+      this.error.set(this.message(e));
+    }
+  }
+
+  async startEdit(row: any): Promise<void> {
+    this.selected.set(row);
+    this.form = this.toForm(row, this.module()!.fields);
+    this.error.set('');
+    try {
+      await this.loadLookups(this.module()!.fields);
+      this.mode.set('edit');
+    } catch (e) {
+      this.error.set(this.message(e));
+    }
+  }
+
+  private async loadLookups(fields: Field[]): Promise<void> {
+    const keys = [...new Set(fields.map((f) => f.lookup).filter((x): x is string => !!x))];
+    const result = await Promise.all(keys.map(async (key) => [key, await this.lookupList(key)] as const));
+    this.lookupRows = Object.fromEntries(result);
+  }
+
+  private lookupList(key: string): Promise<any[]> {
+    switch (key) {
+      case 'users':
+        return this.profileApi.listUsers({ offset: 0, limit: 500 });
+      case 'categories':
+        return this.categoryApi.list({ offset: 0, limit: 500 });
+      case 'products':
+        return this.productApi.list({ offset: 0, limit: 500 });
+      default:
+        return Promise.resolve([]);
+    }
+  }
+
+  hydrateRows(): void {
+    const displayKeys: Record<string, string> = {
+      farmer_id: 'farmer_name',
+      category_id: 'category_name',
+      product_id: 'product_name',
+      user_id: 'user_name',
+    };
+    const fields = this.module()?.fields ?? [];
+    this.rows.set(
+      this.rows().map((row) => {
+        const additions: Record<string, any> = {};
+        for (const field of fields) {
+          if (!field.lookup || !displayKeys[field.key]) continue;
+          const match = (this.lookupRows[field.lookup] ?? []).find(
+            (item) => String(item.id) === String(row[field.key])
+          );
+          if (match) {
+            const target = displayKeys[field.key];
+            additions[target] =
+              field.lookup === 'users' ? `${match.first_name} ${match.last_name}` : match.name ?? match.title ?? `#${match.id}`;
+            if (field.lookup === 'users' && field.key === 'user_id') {
+              additions['user_email'] = match.email;
+              additions['avatar'] = match.avatar;
+            }
+          }
+        }
+        return { ...row, ...additions };
+      })
+    );
+    this.filterRows();
+  }
+
+  lookupOptions(field: Field): any[] {
+    const rows = this.lookupRows[field.lookup ?? ''] ?? [];
+    return field.role ? rows.filter((row) => row.role === field.role) : rows;
+  }
+
+  lookupLabel(key: string, row: any): string {
+    if (key === 'users') return `#${row.id} · ${row.first_name} ${row.last_name} · ${row.email}`;
+    return `#${row.id} · ${row.name ?? row.title ?? 'Record'}`;
+  }
+
+  openDetail(id: number): void {
+    this.router.navigate(['/admin', this.section(), id]);
+  }
+
+  goList(): void {
+    this.router.navigate(['/admin', this.section()]);
+  }
+
+  toForm(row: any, fields: Field[]): Record<string, any> {
+    const result: Record<string, any> = {};
+    for (const f of fields) {
+      let value = row[f.key] ?? '';
+      if (f.type === 'datetime-local' && value) {
+        value = new Date(value).toISOString().slice(0, 16);
+      }
+      result[f.key] = value;
+    }
+    return result;
+  }
+
+  async save(): Promise<void> {
+    this.saving.set(true);
+    this.error.set('');
+    try {
+      const module = this.module()!;
+      const payload: Record<string, any> = {};
+      for (const field of this.editableFields()) {
+        const value = this.form[field.key];
+        if (field.type === 'image' && this.mode() === 'edit' && value === this.selected()?.[field.key]) continue;
+        if (value !== '' && value !== undefined && value !== null) {
+          payload[field.key] =
+            field.lookup || field.type === 'number'
+              ? Number(value)
+              : field.type === 'datetime-local'
+                ? new Date(value).toISOString()
+                : value;
+        } else if (this.mode() === 'edit' && value === '') {
+          payload[field.key] = null;
+        }
+      }
+      if (module.key === 'users' && this.mode() === 'create' && payload['middle_name'] === undefined) {
+        payload['middle_name'] = '';
+      }
+      if (module.key === 'users' && this.mode() === 'edit' && !payload['password']) {
+        delete payload['password'];
+      }
+      const id = this.selected()?.id;
+      if (this.mode() === 'create') {
+        await this.createResource(module.key, payload);
+      } else {
+        await this.updateResource(module.key, id, payload);
+      }
+      this.announce(`${this.singular()} ${this.mode() === 'create' ? 'created' : 'updated'} successfully.`);
+      this.router.navigate(['/admin', module.key]);
+    } catch (e) {
+      this.error.set(this.message(e));
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  async remove(row: any): Promise<void> {
+    this.deleteCandidate.set(row);
+  }
+
+  async confirmDelete(): Promise<void> {
+    const row = this.deleteCandidate();
+    if (!row) return;
+    this.deleteBusy.set(true);
+    try {
+      await this.deleteResource(this.module()!.key, row.id);
+      this.deleteCandidate.set(null);
+      this.announce(`${this.singular()} deleted successfully.`);
+      if (this.mode() === 'detail') this.goList();
+      else await this.loadRows();
+    } catch (e) {
+      this.error.set(this.message(e));
+    } finally {
+      this.deleteBusy.set(false);
+    }
+  }
+
+  async saveProfile(): Promise<void> {
+    this.saving.set(true);
+    this.error.set('');
+    this.success.set('');
+    try {
+      const payload = { ...this.profileForm };
+      if (!payload['password']) delete payload['password'];
+      if (payload['avatar'] === this.api.user()?.avatar) delete payload['avatar'];
+      const updated = await this.profileApi.updateUser(this.api.user()!.id, payload);
+      this.api.user.set(updated);
+      this.success.set('Your administrator profile has been updated.');
+    } catch (e) {
+      this.error.set(this.message(e));
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  profilePayload(user: AdminUser): Record<string, any> {
+    return {
+      first_name: user.first_name,
+      middle_name: user.middle_name ?? '',
+      last_name: user.last_name,
+      email: user.email,
+      phone: user.phone,
+      avatar: user.avatar ?? null,
+      password: '',
+    };
+  }
+
+  toggleSidebar(): void {
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      this.mobileMenu.set(!this.mobileMenu());
+    } else {
+      this.sidebarCollapsed.set(!this.sidebarCollapsed());
+    }
+  }
+
+  closeOverlays(): void {
+    this.profileMenu.set(false);
+    this.notificationMenu.set(false);
+    this.searchOpen.set(false);
+  }
+
+  onWorkspaceClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-anchor') && !target.closest('.topbar-search')) {
+      this.closeOverlays();
+    }
+  }
+
+  async toggleNotifications(): Promise<void> {
+    this.profileMenu.set(false);
+    const opening = !this.notificationMenu();
+    this.notificationMenu.set(opening);
+    if (opening && !this.headerNotifications().length) {
+      try {
+        this.headerNotifications.set(await this.notificationApi.list({ offset: 0, limit: 8 }));
+      } catch (e) {
+        this.announce(this.message(e));
+      }
+    }
+  }
+
+  announce(message: string): void {
+    this.toast.set(message);
+    setTimeout(() => {
+      if (this.toast() === message) this.toast.set('');
+    }, 4000);
+  }
+
+  async signOut(): Promise<void> {
+    this.api.logout();
+    await this.router.navigate(['/login']);
+  }
+
+  private message(e: unknown): string {
+    return e instanceof Error ? e.message : 'Something went wrong. Please try again.';
+  }
 }

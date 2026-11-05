@@ -1,15 +1,293 @@
-<section>
-  <div class="welcome-row"><div><span class="eyebrow">{{greeting()}}</span><h1>Welcome back, {{firstName}}</h1><p>Here’s what’s happening across your marketplace today.</p></div><div class="welcome-actions"><span class="date-pill">◷ &nbsp;{{today}}</span><button class="button secondary" (click)="refresh.emit()">↻ Refresh</button></div></div>
-  <div class="metric-grid">@for(metric of metrics;track metric.label){<app-stat-card [label]="metric.label" [value]="metric.value" [icon]="metric.icon" [tone]="metric.tone" [context]="metric.context"/>}</div>
-  <div class="insights-grid">
-    <section class="panel"><div class="panel-heading"><div><h2>Orders by status</h2><p>Current order pipeline</p></div><a routerLink="/admin/analytics">Analytics →</a></div>@if(orderStatuses().length){<div class="dashboard-bars">@for(entry of orderStatuses();track entry[0]){<div class="dashboard-bar"><span>{{label(entry[0])}}</span><div><i [style.width.%]="orderStatusWidth(entry[1])"></i></div><b>{{count(entry[1])}}</b></div>}</div>}@else{<app-empty-state title="No order status data" description="Order pipeline metrics will appear here when available."/>}</section>
-    <section class="panel"><div class="panel-heading"><div><h2>Top delivered products</h2><p>Based on completed orders</p></div><a routerLink="/admin/analytics">View analytics →</a></div>@if(analytics.top_delivered_products?.length){<div class="delivered-products">@for(item of analytics.top_delivered_products.slice(0,4);track item.product_id;let i=$index){<div class="delivered-product"><span class="product-rank">{{i+1}}</span>@if(item.image){<img [src]="item.image" [alt]="item.product_name">}<div><b>{{item.product_name}}</b><small>{{count(item.quantity_delivered)}} units delivered</small></div><strong>₱{{money(item.delivered_sales_total)}}</strong></div>}</div>}@else{<app-empty-state title="No delivered products yet" description="Completed order data will appear here."/>}</section>
-  </div>
-  <div class="dashboard-grid">
-    <section class="panel"><div class="panel-heading"><div><h2>Recent orders</h2><p>Latest marketplace activity</p></div><a routerLink="/admin/orders">View all →</a></div>@if(orders.length){<div class="table-wrap"><table><thead><tr><th>ORDER</th><th>BUYER</th><th>DATE</th><th>STATUS</th><th></th></tr></thead><tbody>@for(row of orders;track row.id){<tr><td><b>#{{row.order_number||row.id}}</b></td><td>{{row.buyer_id}}</td><td>{{date(row.created_at)}}</td><td><app-status-badge [label]="row.status"/></td><td><a [routerLink]="'/admin/orders/'+row.id">↗</a></td></tr>}</tbody></table></div>}@else{<app-empty-state title="No recent orders" description="New marketplace orders will appear here."/>}</section>
-    <section class="panel quick-panel"><div class="panel-heading"><div><h2>Quick actions</h2><p>Common admin tasks</p></div></div><div class="quick-links"><a routerLink="/admin/products/new"><span>▣</span><b>Add product</b><i>→</i></a><a routerLink="/admin/categories/new"><span>◈</span><b>Add category</b><i>→</i></a><a routerLink="/admin/advisories/new"><span>✳</span><b>Create advisory</b><i>→</i></a><a routerLink="/admin/market-prices/new"><span>↗</span><b>Add market price</b><i>→</i></a><a routerLink="/admin/crop-reports"><span>⚑</span><b>Review reports</b><i>→</i></a></div></section>
-    <section class="panel"><div class="panel-heading"><div><h2>Profiles awaiting review</h2><p>Verification requests needing attention</p></div><a routerLink="/admin/farmer-profiles">Review profiles →</a></div>@if(pendingProfiles.length){<div class="review-list">@for(item of pendingProfiles;track item.id){<a [routerLink]="'/admin/'+(item.kind==='business'?'business-buyer-profiles':'farmer-profiles')+'/'+item.id"><div class="review-icon">{{item.kind==='business'?'⌂':'♧'}}</div><div><b>{{item.name}}</b><small>{{item.kind==='business'?'Business profile':'Farmer profile'}} · {{date(item.created_at)}}</small></div><span class="pending-tag">Pending</span></a>}</div>}@else{<div class="empty-inline">All profile reviews are up to date.</div>}</section>
-    <section class="panel"><div class="panel-heading"><div><h2>Latest crop reports</h2><p>Reports submitted by farmers</p></div><a routerLink="/admin/crop-reports">View reports →</a></div>@if(reports.length){<div class="report-list">@for(row of reports;track row.id){<a [routerLink]="'/admin/crop-reports/'+row.id"><div class="report-symbol">⚑</div><div class="report-text"><b>{{row.report_type|titlecase}}</b><small>{{row.description}}</small></div><app-status-badge [label]="row.status"/></a>}</div>}@else{<app-empty-state title="No crop reports" description="Reports submitted by farmers will appear here."/>}</section>
-    <section class="panel"><div class="panel-heading"><div><h2>New registrations</h2><p>Recently created platform accounts</p></div><a routerLink="/admin/users">Manage users →</a></div>@if(recentUsers.length){<div class="review-list">@for(user of recentUsers;track user.id){<a [routerLink]="'/admin/users/'+user.id"><app-user-avatar [name]="user.first_name+' '+user.last_name" [image]="user.avatar" [size]="32"/><div><b>{{user.first_name}} {{user.last_name}}</b><small>{{user.email}} · {{label(user.role)}}</small></div><app-status-badge [label]="user.status"/></a>}</div>}@else{<app-empty-state title="No registration records" description="Recent accounts will appear here when available."/>}</section>
-  </div>
+<section class="dashboard-page">
+  <!-- Header / Welcome Banner -->
+  <header class="welcome-header">
+    <div class="welcome-intro">
+      <span class="eyebrow">ADMINISTRATOR CONSOLE</span>
+      <h1 class="welcome-title">{{ greeting() }}</h1>
+      <p class="welcome-subtitle">Here is the operational overview across your agricultural marketplace today.</p>
+    </div>
+    <div class="welcome-actions">
+      <span class="date-chip">
+        <app-icon name="calendar" [size]="14" />
+        <span>{{ today }}</span>
+      </span>
+      <button type="button" class="btn btn-secondary" (click)="refresh.emit()" title="Refresh data">
+        <app-icon name="refresh" [size]="14" />
+        <span>Refresh</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Quick Action Shortcuts -->
+  <section class="quick-actions-bar" aria-label="Quick management actions">
+    <span class="quick-title">Quick actions:</span>
+    <div class="quick-chips">
+      <a routerLink="/admin/products/new" class="quick-chip">
+        <app-icon name="plus" [size]="13" />
+        <span>Add product</span>
+      </a>
+      <a routerLink="/admin/categories/new" class="quick-chip">
+        <app-icon name="plus" [size]="13" />
+        <span>Add category</span>
+      </a>
+      <a routerLink="/admin/advisories/new" class="quick-chip">
+        <app-icon name="plus" [size]="13" />
+        <span>Create advisory</span>
+      </a>
+      <a routerLink="/admin/market-prices/new" class="quick-chip">
+        <app-icon name="plus" [size]="13" />
+        <span>Record price</span>
+      </a>
+      <a routerLink="/admin/crop-reports" class="quick-chip">
+        <app-icon name="eye" [size]="13" />
+        <span>Review reports</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- KPI Overview Grid -->
+  <section class="kpi-section" aria-label="Key performance indicators">
+    <div class="kpi-grid">
+      @for (metric of metrics; track metric.label) {
+        <app-stat-card
+          [label]="metric.label"
+          [value]="metric.value"
+          [icon]="metric.icon"
+          [tone]="metric.tone"
+          [context]="metric.context"
+        />
+      }
+    </div>
+  </section>
+
+  <!-- Pipeline & Top Products Row -->
+  <section class="insights-row">
+    <!-- Orders by status -->
+    <div class="panel insight-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Order pipeline</h2>
+          <p>Orders categorized by current fulfillment stage</p>
+        </div>
+        <a routerLink="/admin/analytics">Detailed analytics →</a>
+      </div>
+      @if (orderStatuses().length) {
+        <div class="pipeline-list">
+          @for (entry of orderStatuses(); track entry[0]) {
+            <div class="pipeline-row">
+              <span class="pipeline-label">{{ label(entry[0]) }}</span>
+              <div class="pipeline-track">
+                <div class="pipeline-fill" [style.width.%]="orderStatusWidth(entry[1])"></div>
+              </div>
+              <strong class="pipeline-count">{{ count(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          title="No order pipeline data"
+          description="Order fulfillment data will appear as orders are processed."
+          icon="orders"
+        />
+      }
+    </div>
+
+    <!-- Top delivered products -->
+    <div class="panel insight-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Top delivered products</h2>
+          <p>Highest volume products from completed deliveries</p>
+        </div>
+        <a routerLink="/admin/catalog">Catalog overview →</a>
+      </div>
+      @if (analytics.top_delivered_products?.length) {
+        <div class="products-leaderboard">
+          @for (item of analytics.top_delivered_products.slice(0, 4); track item.product_id; let i = $index) {
+            <div class="leaderboard-item">
+              <span class="rank-badge">{{ i + 1 }}</span>
+              @if (item.image) {
+                <img [src]="item.image" [alt]="item.product_name" class="product-thumb" />
+              } @else {
+                <div class="product-thumb-placeholder">
+                  <app-icon name="package" [size]="16" />
+                </div>
+              }
+              <div class="product-info">
+                <span class="product-name">{{ item.product_name }}</span>
+                <span class="product-meta">{{ count(item.quantity_delivered) }} units delivered</span>
+              </div>
+              <strong class="product-sales">₱{{ money(item.delivered_sales_total) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          title="No delivered products yet"
+          description="Leaderboard displays completed customer orders."
+          icon="products"
+        />
+      }
+    </div>
+  </section>
+
+  <!-- Operations & Queues Grid -->
+  <section class="operations-grid">
+    <!-- Recent Orders -->
+    <div class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Recent orders</h2>
+          <p>Latest orders submitted through the marketplace</p>
+        </div>
+        <a routerLink="/admin/orders">View all orders →</a>
+      </div>
+      @if (orders.length) {
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ORDER</th>
+                <th>BUYER</th>
+                <th>DATE</th>
+                <th>STATUS</th>
+                <th class="text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of orders; track row.id) {
+                <tr>
+                  <td>
+                    <span class="order-id">#{{ row.order_number || row.id }}</span>
+                  </td>
+                  <td>
+                    <span class="buyer-id">Account #{{ row.buyer_id }}</span>
+                  </td>
+                  <td>
+                    <span class="date-text">{{ date(row.created_at) }}</span>
+                  </td>
+                  <td>
+                    <app-status-badge [label]="row.status" />
+                  </td>
+                  <td class="text-right">
+                    <a [routerLink]="'/admin/orders/' + row.id" class="action-link" title="View order details">
+                      <span>View</span>
+                      <app-icon name="chevron-right" [size]="12" />
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <app-empty-state
+          title="No recent orders"
+          description="Customer orders will appear here automatically."
+          icon="orders"
+        />
+      }
+    </div>
+
+    <!-- Verification Queue -->
+    <div class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Profiles awaiting review</h2>
+          <p>Farmer & business verification applications</p>
+        </div>
+        <a routerLink="/admin/farmer-profiles">Manage profiles →</a>
+      </div>
+      @if (pendingProfiles.length) {
+        <div class="activity-list">
+          @for (item of pendingProfiles; track item.id) {
+            <a
+              [routerLink]="'/admin/' + (item.kind === 'business' ? 'business-buyer-profiles' : 'farmer-profiles') + '/' + item.id"
+              class="activity-card"
+            >
+              <div class="activity-icon" [class.business]="item.kind === 'business'">
+                <app-icon [name]="item.kind === 'business' ? 'business-buyer-profiles' : 'farmer-profiles'" [size]="16" />
+              </div>
+              <div class="activity-text">
+                <span class="activity-title">{{ item.name }}</span>
+                <span class="activity-subtitle">
+                  {{ item.kind === 'business' ? 'Business buyer' : 'Farmer' }} · {{ date(item.created_at) }}
+                </span>
+              </div>
+              <app-status-badge label="pending" />
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="all-clear-state">
+          <app-icon name="check-circle" [size]="20" />
+          <span>All verification reviews are up to date.</span>
+        </div>
+      }
+    </div>
+
+    <!-- Latest Crop Reports -->
+    <div class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Latest crop reports</h2>
+          <p>Recent pest, disease, and weather reports</p>
+        </div>
+        <a routerLink="/admin/crop-reports">All reports →</a>
+      </div>
+      @if (reports.length) {
+        <div class="activity-list">
+          @for (row of reports; track row.id) {
+            <a [routerLink]="'/admin/crop-reports/' + row.id" class="activity-card">
+              <div class="activity-icon warning">
+                <app-icon name="alert-triangle" [size]="16" />
+              </div>
+              <div class="activity-text">
+                <span class="activity-title">{{ row.report_type | titlecase }} incident</span>
+                <span class="activity-subtitle excerpt">{{ row.description }}</span>
+              </div>
+              <app-status-badge [label]="row.status" />
+            </a>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          title="No crop reports"
+          description="Agricultural alerts submitted by farmers will appear here."
+          icon="crop-reports"
+        />
+      }
+    </div>
+
+    <!-- Recent Registrations -->
+    <div class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Recent registrations</h2>
+          <p>New user accounts created on FarmerLink</p>
+        </div>
+        <a routerLink="/admin/users">Manage users →</a>
+      </div>
+      @if (recentUsers.length) {
+        <div class="activity-list">
+          @for (user of recentUsers; track user.id) {
+            <a [routerLink]="'/admin/users/' + user.id" class="activity-card">
+              <app-user-avatar [name]="user.first_name + ' ' + user.last_name" [image]="user.avatar" [size]="34" />
+              <div class="activity-text">
+                <span class="activity-title">{{ user.first_name }} {{ user.last_name }}</span>
+                <span class="activity-subtitle">{{ user.email }} · {{ label(user.role) }}</span>
+              </div>
+              <app-status-badge [label]="user.status" />
+            </a>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          title="No registrations"
+          description="Recent user account registrations will appear here."
+          icon="users"
+        />
+      }
+    </div>
+  </section>
 </section>

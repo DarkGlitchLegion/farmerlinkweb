@@ -1,13 +1,244 @@
-<section>
-  <div class="page-heading"><div><span class="eyebrow">OVERVIEW</span><h1>Analytics Overview</h1><p>Monitor FarmerLink's marketplace performance and agricultural operations.</p></div></div>
-  <div class="metric-grid analytics-metrics">@for(metric of metrics;track metric.label){<app-stat-card [label]="metric.label" [value]="metric.value" [icon]="metric.icon" [tone]="metric.tone" [context]="metric.context"/>}</div>
-  <div class="analytics-grid">
-    <section class="panel analytics-panel"><div class="panel-heading"><div><h2>Orders by status</h2><p>Order fulfillment progress</p></div></div>@for(entry of entries(data.orders?.by_status);track entry[0]){<div class="bar-row"><span>{{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.orders?.by_status))"></i></div><b>{{number(entry[1])}}</b></div>}@empty{<app-empty-state title="No order status data" description="Order metrics will appear here when available."/>}</section>
-    <section class="panel analytics-panel"><div class="panel-heading"><div><h2>Users by role</h2><p>Account distribution</p></div></div>@for(entry of entries(data.users?.by_role);track entry[0]){<div class="bar-row"><span>{{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.users?.by_role))"></i></div><b>{{number(entry[1])}}</b></div>}@empty{<app-empty-state title="No user data" description="User statistics will appear here when available."/>}</section>
-    <section class="panel analytics-panel"><div class="panel-heading"><div><h2>Product inventory</h2><p>Current catalog status</p></div></div>@for(entry of entries(data.catalog?.products_by_status);track entry[0]){<div class="bar-row"><span>{{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.catalog?.products_by_status))"></i></div><b>{{number(entry[1])}}</b></div>}@empty{<app-empty-state title="No inventory statistics" description="Catalog metrics will appear here when available."/>}</section>
-    <section class="panel analytics-panel"><div class="panel-heading"><div><h2>Payments</h2><p>Order payment status breakdown</p></div></div>@for(entry of entries(data.orders?.by_payment_status);track entry[0]){<div class="bar-row"><span>{{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.orders?.by_payment_status))"></i></div><b>{{number(entry[1])}}</b></div>}@empty{<app-empty-state title="No payment data" description="Payment statistics will appear here when available."/>}<div class="revenue-summary"><span>Paid sales</span><b>{{money(data.orders?.paid_sales_total)}}</b></div></section>
-    <section class="panel analytics-panel"><div class="panel-heading"><div><h2>Profile verification</h2><p>Farmer and business buyer profiles</p></div></div>@for(entry of entries(data.profiles?.farmer_profiles_by_verification);track entry[0]){<div class="bar-row"><span>Farmer · {{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.profiles?.farmer_profiles_by_verification))"></i></div><b>{{number(entry[1])}}</b></div>}@for(entry of entries(data.profiles?.business_buyer_profiles_by_verification);track entry[0]){<div class="bar-row"><span>Business · {{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.profiles?.business_buyer_profiles_by_verification))"></i></div><b>{{number(entry[1])}}</b></div>}@if(!entries(data.profiles?.farmer_profiles_by_verification).length&&!entries(data.profiles?.business_buyer_profiles_by_verification).length){<app-empty-state title="No verification data" description="Profile statistics will appear here when available."/>}</section>
-    <section class="panel analytics-panel"><div class="panel-heading"><div><h2>Crop reports</h2><p>Reports by current status</p></div></div>@for(entry of entries(data.crop_reports?.by_status);track entry[0]){<div class="bar-row"><span>{{label(entry[0])}}</span><div><i [style.width.%]="barWidth(entry[1],values(data.crop_reports?.by_status))"></i></div><b>{{number(entry[1])}}</b></div>}@empty{<app-empty-state title="No crop report data" description="Crop report statistics will appear here when available."/>}<div class="revenue-summary"><span>Critical reports</span><b>{{number(data.crop_reports?.critical_reports)}}</b></div></section>
-    <section class="panel analytics-panel top-products"><div class="panel-heading"><div><h2>Top delivered products</h2><p>Ranking from completed order data</p></div></div>@for(item of data.top_delivered_products??[];track item.product_id;let i=$index){<div class="top-product"><span class="rank">{{i+1}}</span>@if(item.image){<img [src]="item.image" [alt]="item.product_name">}<div><b>{{item.product_name}}</b><small>{{number(item.quantity_delivered)}} units delivered</small></div><strong>₱{{money(item.delivered_sales_total)}}</strong></div>}@empty{<app-empty-state title="No delivered products" description="This list uses completed marketplace orders only."/>}</section>
+<section class="analytics-page">
+  <app-page-header
+    eyebrow="OVERVIEW"
+    title="Analytics & Operations"
+    description="Comprehensive intelligence on FarmerLink marketplace performance, inventory, accounts, and crop health."
+  />
+
+  <!-- Metric Cards Strip -->
+  <div class="metrics-grid">
+    @for (metric of metrics; track metric.label) {
+      <app-stat-card
+        [label]="metric.label"
+        [value]="metric.value"
+        [icon]="metric.icon"
+        [tone]="metric.tone"
+        [context]="metric.context"
+      />
+    }
+  </div>
+
+  <!-- Analytics Panels Grid -->
+  <div class="charts-grid">
+    <!-- Orders by Status -->
+    <section class="panel chart-card">
+      <div class="panel-heading">
+        <div>
+          <h2>Order fulfillment</h2>
+          <p>Orders categorized by current stage</p>
+        </div>
+      </div>
+      @if (entries(data.orders?.by_status).length) {
+        <div class="chart-content">
+          @for (entry of entries(data.orders?.by_status); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">{{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill primary"
+                  [style.width.%]="barWidth(entry[1], values(data.orders?.by_status))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No order status data" description="Order stats will display once orders are created." icon="orders" />
+      }
+    </section>
+
+    <!-- Users by Role -->
+    <section class="panel chart-card">
+      <div class="panel-heading">
+        <div>
+          <h2>Account distribution</h2>
+          <p>Platform accounts organized by role</p>
+        </div>
+      </div>
+      @if (entries(data.users?.by_role).length) {
+        <div class="chart-content">
+          @for (entry of entries(data.users?.by_role); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">{{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill info"
+                  [style.width.%]="barWidth(entry[1], values(data.users?.by_role))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No user distribution data" description="User stats will appear here." icon="users" />
+      }
+    </section>
+
+    <!-- Product Inventory -->
+    <section class="panel chart-card">
+      <div class="panel-heading">
+        <div>
+          <h2>Catalog listings</h2>
+          <p>Products by marketplace listing status</p>
+        </div>
+      </div>
+      @if (entries(data.catalog?.products_by_status).length) {
+        <div class="chart-content">
+          @for (entry of entries(data.catalog?.products_by_status); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">{{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill gold"
+                  [style.width.%]="barWidth(entry[1], values(data.catalog?.products_by_status))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No catalog statistics" description="Product metrics will appear here." icon="products" />
+      }
+    </section>
+
+    <!-- Payments Breakdown -->
+    <section class="panel chart-card">
+      <div class="panel-heading">
+        <div>
+          <h2>Payment statuses</h2>
+          <p>Orders categorized by payment fulfillment</p>
+        </div>
+      </div>
+      @if (entries(data.orders?.by_payment_status).length) {
+        <div class="chart-content">
+          @for (entry of entries(data.orders?.by_payment_status); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">{{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill primary"
+                  [style.width.%]="barWidth(entry[1], values(data.orders?.by_payment_status))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+        <div class="card-summary-foot">
+          <span class="foot-label">Total settled sales</span>
+          <strong class="foot-val">₱{{ money(data.orders?.paid_sales_total) }}</strong>
+        </div>
+      } @else {
+        <app-empty-state title="No payment data" description="Payment statistics will appear here." icon="orders" />
+      }
+    </section>
+
+    <!-- Profile Verifications -->
+    <section class="panel chart-card">
+      <div class="panel-heading">
+        <div>
+          <h2>Profile verification status</h2>
+          <p>Farmer and business buyer compliance</p>
+        </div>
+      </div>
+      @if (entries(data.profiles?.farmer_profiles_by_verification).length || entries(data.profiles?.business_buyer_profiles_by_verification).length) {
+        <div class="chart-content">
+          @for (entry of entries(data.profiles?.farmer_profiles_by_verification); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">Farmer · {{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill primary"
+                  [style.width.%]="barWidth(entry[1], values(data.profiles?.farmer_profiles_by_verification))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+          @for (entry of entries(data.profiles?.business_buyer_profiles_by_verification); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">Business · {{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill info"
+                  [style.width.%]="barWidth(entry[1], values(data.profiles?.business_buyer_profiles_by_verification))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No verification records" description="Profile verification stats will appear here." icon="users" />
+      }
+    </section>
+
+    <!-- Crop Reports -->
+    <section class="panel chart-card">
+      <div class="panel-heading">
+        <div>
+          <h2>Crop & pest reports</h2>
+          <p>Field incidents reported by farmers</p>
+        </div>
+      </div>
+      @if (entries(data.crop_reports?.by_status).length) {
+        <div class="chart-content">
+          @for (entry of entries(data.crop_reports?.by_status); track entry[0]) {
+            <div class="bar-item">
+              <span class="bar-title">{{ label(entry[0]) }}</span>
+              <div class="bar-track">
+                <div
+                  class="bar-fill rose"
+                  [style.width.%]="barWidth(entry[1], values(data.crop_reports?.by_status))"
+                ></div>
+              </div>
+              <strong class="bar-val">{{ number(entry[1]) }}</strong>
+            </div>
+          }
+        </div>
+        <div class="card-summary-foot">
+          <span class="foot-label">Critical incidents flagged</span>
+          <strong class="foot-val danger">{{ number(data.crop_reports?.critical_reports) }}</strong>
+        </div>
+      } @else {
+        <app-empty-state title="No crop report records" description="Field incident stats will appear here." icon="crop-reports" />
+      }
+    </section>
+
+    <!-- Top Delivered Products -->
+    <section class="panel chart-card full-width">
+      <div class="panel-heading">
+        <div>
+          <h2>Top delivered agricultural commodities</h2>
+          <p>Leaderboard ranked by completed marketplace orders</p>
+        </div>
+      </div>
+      @if (data.top_delivered_products?.length) {
+        <div class="top-products-grid">
+          @for (item of data.top_delivered_products; track item.product_id; let i = $index) {
+            <div class="leaderboard-card">
+              <span class="rank-num">{{ i + 1 }}</span>
+              @if (item.image) {
+                <img [src]="item.image" [alt]="item.product_name" class="item-img" />
+              } @else {
+                <div class="item-img-placeholder">
+                  <app-icon name="package" [size]="18" />
+                </div>
+              }
+              <div class="item-details">
+                <span class="item-name">{{ item.product_name }}</span>
+                <span class="item-qty">{{ number(item.quantity_delivered) }} units delivered</span>
+              </div>
+              <strong class="item-revenue">₱{{ money(item.delivered_sales_total) }}</strong>
+            </div>
+          }
+        </div>
+      } @else {
+        <app-empty-state title="No delivered products" description="Completed order data will appear here." icon="products" />
+      }
+    </section>
   </div>
 </section>

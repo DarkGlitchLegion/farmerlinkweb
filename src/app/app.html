@@ -1,0 +1,796 @@
+<div class="admin-layout" (click)="onWorkspaceClick($event)">
+  <!-- Mobile Menu Backdrop -->
+  @if (mobileMenu()) {
+    <button class="sidebar-backdrop" aria-label="Close navigation" (click)="mobileMenu.set(false)"></button>
+  }
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="mobileMenu()" [class.collapsed]="sidebarCollapsed()">
+    <!-- Brand -->
+    <a class="brand" routerLink="/admin" (click)="mobileMenu.set(false)">
+      <span class="brand-mark" aria-hidden="true">
+        <app-icon name="leaf" [size]="20" />
+      </span>
+      <span class="brand-copy">
+        <span class="brand-name">Farmer<span class="brand-accent">Link</span></span>
+        <small class="brand-badge">ADMIN CONSOLE</small>
+      </span>
+    </a>
+
+    <!-- Navigation Groups -->
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <div class="nav-section-label">OVERVIEW</div>
+      <a
+        class="nav-link"
+        routerLink="/admin/dashboard"
+        [class.active]="section() === 'dashboard'"
+        [attr.aria-current]="section() === 'dashboard' ? 'page' : null"
+        (click)="mobileMenu.set(false)"
+      >
+        <span class="nav-icon"><app-icon name="dashboard" [size]="18" /></span>
+        <span class="nav-text">Dashboard</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/admin/analytics"
+        [class.active]="section() === 'analytics'"
+        [attr.aria-current]="section() === 'analytics' ? 'page' : null"
+        (click)="mobileMenu.set(false)"
+      >
+        <span class="nav-icon"><app-icon name="analytics" [size]="18" /></span>
+        <span class="nav-text">Analytics</span>
+      </a>
+
+      @for (group of navigationGroups; track group.title) {
+        <div class="nav-section-label">{{ group.title }}</div>
+        @for (item of navigationItems(group); track item.key) {
+          <a
+            class="nav-link"
+            [routerLink]="'/admin/' + item.key"
+            [class.active]="section() === item.key"
+            [attr.aria-current]="section() === item.key ? 'page' : null"
+            (click)="mobileMenu.set(false)"
+          >
+            <span class="nav-icon"><app-icon [name]="item.iconName || item.key" [size]="18" /></span>
+            <span class="nav-text">{{ item.title }}</span>
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- Sidebar Bottom: System & User Profile -->
+    <div class="sidebar-footer">
+      <div class="nav-section-label">SYSTEM</div>
+      <a
+        class="nav-link"
+        routerLink="/admin/settings"
+        [class.active]="section() === 'settings'"
+        (click)="mobileMenu.set(false)"
+      >
+        <span class="nav-icon"><app-icon name="settings" [size]="18" /></span>
+        <span class="nav-text">Settings</span>
+      </a>
+      <button type="button" class="nav-link signout-btn" (click)="signOut()">
+        <span class="nav-icon"><app-icon name="signout" [size]="18" /></span>
+        <span class="nav-text">Sign out</span>
+      </button>
+
+      <div class="user-chip">
+        <app-user-avatar [name]="displayName()" [image]="api.user()?.avatar" [size]="34" />
+        <div class="user-chip-info">
+          <strong class="user-chip-name">{{ displayName() }}</strong>
+          <small class="user-chip-role">Administrator</small>
+        </div>
+        <span class="online-indicator" title="Online"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="main-area" [class.wide]="sidebarCollapsed()">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="menu-toggle"
+          aria-label="Open mobile navigation"
+          [attr.aria-expanded]="mobileMenu()"
+          (click)="toggleSidebar()"
+        >
+          <app-icon name="menu" [size]="20" />
+        </button>
+
+        <button
+          type="button"
+          class="collapse-toggle"
+          [attr.aria-label]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+          [attr.aria-expanded]="!sidebarCollapsed()"
+          (click)="sidebarCollapsed.set(!sidebarCollapsed())"
+          title="Toggle sidebar"
+        >
+          <app-icon [name]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
+        </button>
+
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <span class="breadcrumb-root">FarmerLink</span>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <strong class="breadcrumb-current">{{ pageTitle() }}</strong>
+        </nav>
+      </div>
+
+      <!-- Center Search -->
+      <div class="topbar-search">
+        <div class="search-input-wrap">
+          <app-icon name="search" [size]="15" class="search-icon" />
+          <input
+            type="text"
+            aria-label="Search management modules"
+            placeholder="Search pages and modules…"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="searchOpen.set(true)"
+            (focus)="searchOpen.set(true)"
+          />
+        </div>
+
+        @if (searchOpen() && searchTerm) {
+          <div class="search-results-popover">
+            @for (item of searchResults(); track item.key) {
+              <a
+                [routerLink]="item.key === 'dashboard' ? '/admin' : '/admin/' + item.key"
+                (click)="closeOverlays()"
+                class="search-result-item"
+              >
+                <app-icon [name]="item.iconName || item.key" [size]="16" />
+                <span>{{ item.title }}</span>
+              </a>
+            }
+            @if (!searchResults().length) {
+              <p class="search-empty">No matching pages found.</p>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Topbar Actions -->
+      <div class="topbar-right">
+        <!-- Notifications Menu -->
+        <div class="dropdown-anchor">
+          <button
+            type="button"
+            class="icon-button notification-button"
+            aria-label="Notifications"
+            [attr.aria-expanded]="notificationMenu()"
+            (click)="toggleNotifications()"
+          >
+            <app-icon name="notifications" [size]="18" />
+            @if (unreadNotifications()) {
+              <span class="unread-dot"></span>
+            }
+          </button>
+
+          @if (notificationMenu()) {
+            <div class="account-dropdown notification-dropdown">
+              <div class="dropdown-heading">
+                <strong>Notifications</strong>
+                <a routerLink="/admin/notifications" (click)="closeOverlays()">View all</a>
+              </div>
+              <div class="notification-items-list">
+                @for (item of headerNotifications(); track item.id) {
+                  <a class="dropdown-notification" routerLink="/admin/notifications" (click)="closeOverlays()">
+                    <span class="notification-mark" [class.unread]="item.is_read === 'unread'">
+                      <app-icon [name]="item.is_read === 'unread' ? 'notifications' : 'check'" [size]="12" />
+                    </span>
+                    <span class="notification-text">
+                      <strong>{{ item.title }}</strong>
+                      <small>{{ item.message }}</small>
+                    </span>
+                  </a>
+                }
+                @if (!headerNotifications().length) {
+                  <p class="dropdown-empty">No notifications available.</p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Profile Menu -->
+        <div class="dropdown-anchor">
+          <button
+            type="button"
+            class="profile-trigger"
+            aria-label="Administrator profile menu"
+            [attr.aria-expanded]="profileMenu()"
+            (click)="profileMenu.set(!profileMenu())"
+          >
+            <app-user-avatar [name]="displayName()" [image]="api.user()?.avatar" [size]="32" />
+            <span class="profile-meta">
+              <strong class="profile-name">{{ displayName() }}</strong>
+              <small class="profile-role">Admin</small>
+            </span>
+            <app-icon name="chevron-down" [size]="14" class="profile-arrow" />
+          </button>
+
+          @if (profileMenu()) {
+            <div class="account-dropdown profile-dropdown">
+              <a routerLink="/admin/profile" class="dropdown-item" (click)="closeOverlays()">
+                <app-icon name="users" [size]="16" />
+                <span>My profile</span>
+              </a>
+              <a routerLink="/admin/settings" class="dropdown-item" (click)="closeOverlays()">
+                <app-icon name="settings" [size]="16" />
+                <span>Settings</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <button type="button" class="dropdown-item danger-item" (click)="signOut()">
+                <app-icon name="signout" [size]="16" />
+                <span>Sign out</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content Area -->
+    <div class="page-content">
+      @if (loading()) {
+        <app-loading-spinner [label]="'Loading ' + pageTitle().toLowerCase() + '…'" />
+      }
+
+      @if (pageError()) {
+        <div class="alert error page-alert">
+          <app-icon name="alert-triangle" [size]="20" />
+          <div class="page-alert-content">
+            <strong>We could not load this section</strong>
+            <span>{{ pageError() }}</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" (click)="loadPage()">Try again</button>
+        </div>
+      }
+
+      <!-- Dashboard Component -->
+      @if (!loading() && !pageError() && section() === 'dashboard') {
+        <app-dashboard-page
+          [metrics]="metrics()"
+          [analytics]="analytics()"
+          [orders]="orders()"
+          [pendingProfiles]="pendingProfiles()"
+          [reports]="reports()"
+          [recentUsers]="recentUsers()"
+          [firstName]="firstName()"
+          (refresh)="loadPage()"
+        />
+      }
+
+      <!-- Analytics Component -->
+      @if (!loading() && !pageError() && section() === 'analytics') {
+        <app-analytics-page [data]="analytics()" [metrics]="metrics()" />
+      }
+
+      <!-- Catalog Overview Component -->
+      @if (!loading() && !pageError() && section() === 'catalog') {
+        <app-catalog-overview
+          [analytics]="analytics()"
+          [products]="catalogProducts()"
+          [categories]="catalogCategories()"
+          [batches]="catalogBatches()"
+        />
+      }
+
+      <!-- Generic Module Management Views -->
+      @if (!loading() && !pageError() && module() && section() !== 'catalog') {
+        <section class="management-section">
+          <!-- Page Header -->
+          <div class="page-heading-row">
+            <div>
+              <span class="eyebrow">MANAGEMENT</span>
+              <h1 class="page-title">{{ module()!.title }}</h1>
+              <p class="page-desc">{{ managementDescription() }}</p>
+            </div>
+            @if (module()!.create && mode() === 'list') {
+              <button type="button" class="btn btn-primary" (click)="startCreate()">
+                <app-icon name="plus" [size]="16" />
+                <span>Add {{ singular() }}</span>
+              </button>
+            }
+          </div>
+
+          <!-- Module KPI Stats Strip (if available) -->
+          @if (managementStats().length && mode() === 'list') {
+            <div class="metric-grid management-metrics">
+              @for (stat of managementStats(); track stat.label) {
+                <app-stat-card [label]="stat.label" [value]="stat.value" icon="analytics" tone="green" />
+              }
+            </div>
+          }
+
+          <!-- LIST VIEW -->
+          @if (mode() === 'list') {
+            <section class="panel data-panel">
+              <!-- Search & Filter Toolbar -->
+              <div class="list-toolbar">
+                <div class="toolbar-search-box">
+                  <app-icon name="search" [size]="15" class="search-box-icon" />
+                  <input
+                    type="text"
+                    [placeholder]="'Search ' + module()!.title.toLowerCase() + '…'"
+                    [(ngModel)]="query"
+                    (ngModelChange)="filterRows()"
+                  />
+                  @if (query) {
+                    <button type="button" class="clear-query-btn" (click)="query = ''; filterRows()" aria-label="Clear search">×</button>
+                  }
+                </div>
+
+                <div class="toolbar-filters">
+                  <!-- User Role Filter -->
+                  @if (section() === 'users') {
+                    <select aria-label="Filter users by role" [(ngModel)]="userRoleFilter" (ngModelChange)="filterRows()">
+                      <option value="all">All roles</option>
+                      <option value="admin">Administrator</option>
+                      <option value="farmer">Farmer</option>
+                      <option value="buyer">Individual Buyer</option>
+                      <option value="business_buyer">Business Buyer</option>
+                    </select>
+                  }
+
+                  <!-- Status Filter -->
+                  @if (statusOptions().length) {
+                    <select aria-label="Filter by status" [(ngModel)]="recordStatusFilter" (ngModelChange)="filterRows()">
+                      <option value="all">All statuses</option>
+                      @for (status of statusOptions(); track status) {
+                        <option [value]="status">{{ label(status) }}</option>
+                      }
+                    </select>
+                  }
+
+                  <!-- Lookup Filters -->
+                  @for (field of lookupFields(); track field.key) {
+                    <select
+                      [attr.aria-label]="'Filter by ' + field.label"
+                      [(ngModel)]="lookupFilters[field.key]"
+                      (ngModelChange)="filterRows()"
+                    >
+                      <option value="">All {{ field.label.toLowerCase() }}s</option>
+                      @for (option of lookupOptions(field); track option.id) {
+                        <option [value]="option.id">{{ lookupLabel(field.lookup!, option) }}</option>
+                      }
+                    </select>
+                  }
+
+                  <!-- Product Availability Filter -->
+                  @if (section() === 'products') {
+                    <select aria-label="Filter product availability" [(ngModel)]="availabilityFilter" (ngModelChange)="filterRows()">
+                      <option value="all">All stock</option>
+                      <option value="available">Available in stock</option>
+                      <option value="out">Out of stock</option>
+                    </select>
+
+                    <div class="view-toggle" role="group" aria-label="View layout">
+                      <button
+                        type="button"
+                        [class.active]="catalogView === 'grid'"
+                        (click)="catalogView = 'grid'"
+                        title="Grid view"
+                      >
+                        <app-icon name="grid" [size]="14" />
+                      </button>
+                      <button
+                        type="button"
+                        [class.active]="catalogView === 'table'"
+                        (click)="catalogView = 'table'"
+                        title="Table view"
+                      >
+                        <app-icon name="table" [size]="14" />
+                      </button>
+                    </div>
+                  }
+
+                  <!-- Orders Payment Filter -->
+                  @if (section() === 'orders' && paymentStatusOptions().length) {
+                    <select aria-label="Filter by payment status" [(ngModel)]="paymentStatusFilter" (ngModelChange)="filterRows()">
+                      <option value="">All payment statuses</option>
+                      @for (status of paymentStatusOptions(); track status) {
+                        <option [value]="status">{{ label(status) }}</option>
+                      }
+                    </select>
+                  }
+
+                  <span class="toolbar-meta">{{ filteredRows().length }} of {{ rows().length }} records</span>
+
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="loadPage()" title="Refresh records">
+                    <app-icon name="refresh" [size]="13" />
+                    <span>Refresh</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Content Presentation -->
+              @if (filteredRows().length) {
+                @if (section() === 'categories' || (section() === 'products' && catalogView === 'grid')) {
+                  <app-catalog-grid
+                    [kind]="section() === 'categories' ? 'categories' : 'products'"
+                    [records]="filteredRows()"
+                    [deletable]="module()!.delete ?? false"
+                    (view)="openDetail($event.id)"
+                    (edit)="startEdit($event)"
+                    (remove)="remove($event)"
+                  />
+                } @else {
+                  <div class="table-container">
+                    <table class="admin-table">
+                      <thead>
+                        <tr>
+                          @for (column of columns(); track column) {
+                            <th>{{ label(column) }}</th>
+                          }
+                          <th class="actions-col">ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of filteredRows(); track row.id) {
+                          <tr>
+                            @for (column of columns(); track column) {
+                              <td>
+                                @if (column === 'first_name') {
+                                  <div class="table-user-cell">
+                                    <app-user-avatar [name]="row.first_name + ' ' + row.last_name" [image]="row.avatar" [size]="30" />
+                                    <div class="table-user-text">
+                                      <strong class="user-fullname">{{ row.first_name }} {{ row.last_name }}</strong>
+                                      <small class="user-email">{{ row.email }}</small>
+                                    </div>
+                                  </div>
+                                } @else if (column === 'avatar') {
+                                  <app-user-avatar [name]="row.user_name ?? row.first_name ?? 'Account'" [image]="row.avatar" [size]="32" />
+                                } @else if (column === 'image' && row.image) {
+                                  <img class="table-thumb" [src]="row.image" [alt]="row.name ?? 'Record thumbnail'" />
+                                } @else if (['status', 'verification_status', 'is_read', 'severity', 'payment_status', 'role'].includes(column)) {
+                                  <app-status-badge [label]="row[column]" />
+                                } @else {
+                                  <span>{{ displayCell(row, column) }}</span>
+                                }
+                              </td>
+                            }
+                            <td class="actions-col">
+                              <div class="row-actions-group">
+                                <button type="button" class="btn btn-secondary btn-xs" (click)="openDetail(row.id)">
+                                  View
+                                </button>
+                                <button type="button" class="btn btn-secondary btn-xs" (click)="startEdit(row)">
+                                  {{ section() === 'orders' ? 'Update' : 'Edit' }}
+                                </button>
+                                @if (module()!.delete) {
+                                  <button type="button" class="btn btn-danger-ghost btn-xs" (click)="remove(row)" title="Delete">
+                                    <app-icon name="trash" [size]="12" />
+                                  </button>
+                                }
+                              </div>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              } @else {
+                <app-empty-state
+                  [icon]="query || userRoleFilter !== 'all' || recordStatusFilter !== 'all' ? 'search' : 'leaf'"
+                  [title]="query || userRoleFilter !== 'all' || recordStatusFilter !== 'all' ? 'No matching records' : 'No records yet'"
+                  [description]="query || userRoleFilter !== 'all' || recordStatusFilter !== 'all' ? 'Try adjusting your search criteria or filters.' : 'Records will appear here as they are added to the system.'"
+                />
+              }
+
+              <!-- Pagination -->
+              <app-pagination
+                [offset]="offset"
+                [currentCount]="rows().length"
+                [hasNext]="hasNext"
+                (pageChange)="page($event)"
+              />
+            </section>
+          }
+
+          <!-- DETAIL VIEW -->
+          @if (mode() === 'detail' && selected()) {
+            <section class="panel record-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">RECORD #{{ selected().id }}</span>
+                  <h2>{{ module()!.title }} Details</h2>
+                </div>
+                <div class="panel-header-buttons">
+                  <button type="button" class="btn btn-secondary" (click)="goList()">
+                    <app-icon name="chevron-left" [size]="14" />
+                    <span>Back to list</span>
+                  </button>
+                  <button type="button" class="btn btn-primary" (click)="startEdit(selected())">
+                    <app-icon name="edit" [size]="14" />
+                    <span>{{ section() === 'orders' ? 'Update order' : 'Edit record' }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="detail-body">
+                @if (selected().image) {
+                  <div class="detail-banner">
+                    <img [src]="selected().image" alt="Record attachment" class="detail-banner-img" />
+                  </div>
+                }
+                @if (selected().avatar) {
+                  <div class="detail-banner">
+                    <img [src]="selected().avatar" alt="Profile photo" class="detail-banner-img" />
+                  </div>
+                }
+
+                <div class="details-grid">
+                  @for (entry of detailEntries(); track entry[0]) {
+                    <div class="detail-item">
+                      <small class="detail-label">{{ label(entry[0]) }}</small>
+                      <strong class="detail-value">{{ formatValue(entry[1]) }}</strong>
+                    </div>
+                  }
+                </div>
+
+                @if (section() === 'orders') {
+                  <div class="order-items-box">
+                    <h3 class="order-items-title">Order Line Items</h3>
+                    @if (orderItems().length) {
+                      <div class="table-container">
+                        <table class="admin-table">
+                          <thead>
+                            <tr>
+                              <th>PRODUCT</th>
+                              <th>BATCH</th>
+                              <th>QUANTITY</th>
+                              <th>UNIT PRICE</th>
+                              <th class="text-right">SUBTOTAL</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (item of orderItems(); track item.id) {
+                              <tr>
+                                <td><strong>Product #{{ item.product_id }}</strong></td>
+                                <td>Batch #{{ item.harvest_batch_id }}</td>
+                                <td>{{ item.quantity }} units</td>
+                                <td>₱{{ money(item.unit_price) }}</td>
+                                <td class="text-right"><strong>₱{{ money(item.quantity * item.unit_price) }}</strong></td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    } @else {
+                      <p class="order-items-empty">No order items recorded for this transaction.</p>
+                    }
+                  </div>
+                }
+
+                @if (module()!.delete) {
+                  <div class="record-danger-zone">
+                    <button type="button" class="btn btn-danger" (click)="remove(selected())">
+                      <app-icon name="trash" [size]="14" />
+                      <span>Delete this record</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- CREATE / EDIT FORM -->
+          @if (mode() === 'edit' || mode() === 'create') {
+            <form class="panel edit-panel" (ngSubmit)="save()">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">{{ mode() === 'create' ? 'NEW RECORD' : 'UPDATE RECORD' }}</span>
+                  <h2>{{ mode() === 'create' ? 'Add' : 'Edit' }} {{ singular() }}</h2>
+                </div>
+                <button type="button" class="btn btn-secondary" (click)="goList()">Cancel</button>
+              </div>
+
+              <div class="form-body">
+                @if (section() === 'market-prices' && mode() === 'create') {
+                  <div class="info-note">
+                    <app-icon name="info" [size]="18" />
+                    <div class="info-note-content">
+                      <strong>Price Verification Notice</strong>
+                      <span>FarmerLink will automatically log your signed-in administrator account as the verifier for this recorded commodity price.</span>
+                    </div>
+                  </div>
+                }
+
+                <div class="form-grid">
+                  @for (field of editableFields(); track field.key) {
+                    <div class="form-field" [class.wide-field]="field.multiline || field.type === 'image'">
+                      <label [for]="'field-' + field.key" class="field-label">
+                        <span>{{ field.label }}</span>
+                        @if (required(field)) {
+                          <span class="required-star">*</span>
+                        }
+                      </label>
+
+                      @if (field.lookup) {
+                        <select
+                          [id]="'field-' + field.key"
+                          [name]="field.key"
+                          [(ngModel)]="form[field.key]"
+                          [required]="required(field)"
+                        >
+                          <option [ngValue]="null">Select {{ field.label.toLowerCase() }}</option>
+                          @for (option of lookupOptions(field); track option.id) {
+                            <option [ngValue]="option.id">{{ lookupLabel(field.lookup, option) }}</option>
+                          }
+                        </select>
+                      } @else if (field.choices) {
+                        <select
+                          [id]="'field-' + field.key"
+                          [name]="field.key"
+                          [(ngModel)]="form[field.key]"
+                          [required]="required(field)"
+                        >
+                          <option value="">Select {{ field.label.toLowerCase() }}</option>
+                          @for (choice of field.choices; track choice) {
+                            <option [value]="choice">{{ choice | titlecase }}</option>
+                          }
+                        </select>
+                      } @else if (field.multiline) {
+                        <textarea
+                          [id]="'field-' + field.key"
+                          [name]="field.key"
+                          [(ngModel)]="form[field.key]"
+                          [required]="required(field)"
+                          rows="4"
+                          placeholder="Enter {{ field.label.toLowerCase() }}…"
+                        ></textarea>
+                      } @else if (field.type === 'image') {
+                        <app-image-upload [(value)]="form[field.key]" />
+                      } @else {
+                        <input
+                          [id]="'field-' + field.key"
+                          [name]="field.key"
+                          [type]="field.type || 'text'"
+                          [(ngModel)]="form[field.key]"
+                          [required]="required(field)"
+                          [step]="field.type === 'number' ? 'any' : null"
+                          placeholder="Enter {{ field.label.toLowerCase() }}…"
+                        />
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Live Preview for Advisories -->
+                @if (section() === 'advisories') {
+                  <aside class="content-preview">
+                    <span class="preview-eyebrow">LIVE ADVISORY PREVIEW</span>
+                    <h2 class="preview-title">{{ form['title'] || 'Advisory title will appear here' }}</h2>
+                    <div class="preview-badges">
+                      <app-status-badge [label]="form['category'] || 'general'" />
+                      <app-status-badge [label]="form['severity'] || 'medium'" />
+                      <app-status-badge [label]="form['status'] || 'draft'" />
+                    </div>
+                    <p class="preview-content">{{ form['content'] || 'Write content above to see how this advisory will be displayed to farmers and buyers.' }}</p>
+                  </aside>
+                }
+
+                <!-- Live Preview for Notifications -->
+                @if (section() === 'notifications') {
+                  <aside class="content-preview notification-preview">
+                    <span class="preview-eyebrow">LIVE NOTIFICATION PREVIEW</span>
+                    <h2 class="preview-title">{{ form['title'] || 'Notification subject' }}</h2>
+                    <p class="preview-content">{{ form['message'] || 'Message text delivered to the selected recipient.' }}</p>
+                  </aside>
+                }
+
+                @if (error()) {
+                  <div class="alert error">
+                    <app-icon name="alert-triangle" [size]="16" />
+                    <span>{{ error() }}</span>
+                  </div>
+                }
+
+                <div class="form-footer">
+                  <button type="button" class="btn btn-secondary" (click)="goList()">Cancel</button>
+                  <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                    @if (saving()) {
+                      <span>Saving…</span>
+                    } @else {
+                      <span>Save changes</span>
+                    }
+                  </button>
+                </div>
+              </div>
+            </form>
+          }
+        </section>
+      }
+
+      <!-- PROFILE & SETTINGS PAGES -->
+      @if (!loading() && !pageError() && (section() === 'profile' || section() === 'settings')) {
+        <section class="management-section">
+          <div class="page-heading-row">
+            <div>
+              <span class="eyebrow">ACCOUNT</span>
+              <h1 class="page-title">{{ section() === 'settings' ? 'System Settings' : 'My Administrator Profile' }}</h1>
+              <p class="page-desc">Manage your administrator account credentials, personal information, and platform preferences.</p>
+            </div>
+          </div>
+
+          <form class="panel edit-panel" (ngSubmit)="saveProfile()">
+            <div class="form-body">
+              <div class="form-grid">
+                @for (field of profileFields; track field.key) {
+                  <div class="form-field" [class.wide-field]="field.type === 'image'">
+                    <label [for]="'profile-' + field.key" class="field-label">
+                      <span>{{ field.label }}</span>
+                      @if (field.key !== 'password' && field.key !== 'middle_name') {
+                        <span class="required-star">*</span>
+                      }
+                    </label>
+
+                    @if (field.type === 'image') {
+                      <app-image-upload [(value)]="profileForm[field.key]" />
+                    } @else {
+                      <input
+                        [id]="'profile-' + field.key"
+                        [name]="field.key"
+                        [type]="field.type || 'text'"
+                        [(ngModel)]="profileForm[field.key]"
+                        [required]="field.key !== 'password' && field.key !== 'middle_name'"
+                        placeholder="Enter {{ field.label.toLowerCase() }}…"
+                      />
+                    }
+                  </div>
+                }
+              </div>
+
+              @if (error()) {
+                <div class="alert error">
+                  <app-icon name="alert-triangle" [size]="16" />
+                  <span>{{ error() }}</span>
+                </div>
+              }
+
+              @if (success()) {
+                <div class="alert success">
+                  <app-icon name="check-circle" [size]="16" />
+                  <span>{{ success() }}</span>
+                </div>
+              }
+
+              <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                  {{ saving() ? 'Saving…' : 'Save profile' }}
+                </button>
+              </div>
+            </div>
+          </form>
+        </section>
+      }
+    </div>
+  </main>
+
+  <!-- Global Toast Notification -->
+  @if (toast()) {
+    <div class="toast-message" role="status">
+      <span>✓</span>
+      <span>{{ toast() }}</span>
+      <button type="button" aria-label="Dismiss notification" (click)="toast.set('')">×</button>
+    </div>
+  }
+
+  <!-- Global Confirm Dialog -->
+  @if (deleteCandidate()) {
+    <app-confirm-dialog
+      title="Delete record?"
+      [message]="'Are you sure you want to delete ' + singular().toLowerCase() + ' #' + deleteCandidate().id + '? This action is permanent and cannot be undone.'"
+      confirmLabel="Delete"
+      [busy]="deleteBusy()"
+      (confirm)="confirmDelete()"
+      (cancel)="deleteCandidate.set(null)"
+    />
+  }
+</div>
+
